@@ -1,18 +1,8 @@
-/*
- * estensione della classe Proxy, che permette di intercettare anche le funzioni e i metodi di classe.
- * *** non più valida questa parte *** ho trovato soluzion emigliore inserendo due handler
- * grazie al contributo di https://gist.github.com/mrharel/592df0228cebc017ca413f2f763acc5f
- * si fa in modo che i get vengano applicati anche ai metodi, oppure introduco nuovo handler.func|applyInto
- *
- * permette anche di inserire callback a inizio dell'intercettazione da eseguire
- */
-
-
 /* global Function, Reflect */
 
-const assert = require('@decenfreeland/assert');
+const assert = require('chai').assert;
 
-const err = require('errorC');
+const err = require('./lib/errorC.js');
 
 //// invece di usare solo due argomenti, implementare come ho fatto per ProxyTracker con generaHandler
 function ProxyExtension(target, handler_for_proxy, handler_annidato){
@@ -82,8 +72,6 @@ function returnEndingTrapFromList(metodo, handler){
   return (...args)=>{let value = trap(...args); return returnProxyOrValue(value, handler);};
 
   function returnProxyOrValue(value, handler){
-    console.log('return proxy');
-    console.dir(value); console.dir(handler); console.dir((value instanceof Function || typeof value === 'object') && typeof handler === 'object');
     if((value instanceof Function || typeof value === 'object') && typeof handler === 'object')
       return new Proxy(value, handler);
     else return value;

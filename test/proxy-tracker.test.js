@@ -1,12 +1,11 @@
 /* global Promise, describe, it, __dirname, process*/
 const {expect, assert} = require('chai');
-const request = require('superagent');
 const util = require('util');
 
 process.env.NODE_ENV = 'test';
 const ambiente = process.env.NODE_ENV;
 
-const {ProxyExtension, ProxyTracker} = require(`../proxy-extension.js`);
+const {ProxyExtension, ProxyTracker} = require(`../proxy-tracker.js`);
 
 const t = {};
 Object.freeze(t);
@@ -165,7 +164,7 @@ describe('ProxyTracker', () => { // la maggior parte di questtest (che sono skip
       it('handler = {construct: {get: {apply}}} inserisce la callback in apply e non in construct o get', () => {
         const handler = {construct: {get: {apply: cb1}}};
         
-        const {generaHandlerForProxyTrack} = require(`../proxy-extension.js`).test;
+        const {generaHandlerForProxyTrack} = require(`../proxy-tracker.js`).test;
         let track = new ProxyTracker(classe, handler);
    
         let istanza = new track(5);
@@ -210,7 +209,7 @@ describe('ProxyTracker', () => { // la maggior parte di questtest (che sono skip
 });
 
 if(ambiente === 'test'){
-  const {generaHandlerForProxyTrack ,generaHandlerForProxy} = require(`../proxy-extension.js`).test;
+  const {generaHandlerForProxyTrack ,generaHandlerForProxy} = require(`../proxy-tracker.js`).test;
   describe('test funzioni interne', () => {
     describe('generaHandler', () => {
       it('handler_track vuoto, {} -> return {}', () => {

@@ -25,5 +25,10 @@
   "bugs": {
     "url": "https://github.com/CitySeventeen/ProxyTracker/issues"
   },
-  "homepage": "https://github.com/CitySeventeen/ProxyTracker#readme"
+  "homepage": "https://github.com/CitySeventeen/ProxyTracker#readme",
+  "dependencies": {
+    "chai": "^4.3.6",
+    "mocha": "^10.0.0",
+    "winston": "^3.7.2"
+  }
 }
