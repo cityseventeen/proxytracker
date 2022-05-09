@@ -79,8 +79,9 @@ function returnEndingTrapFromList(metodo, handler){
 }
 function template_trap(callbacks, returning){
   return (...args)=>{
-    for(let cb of callbacks) cb(...args);
-    return returning(...args);
+    let value = returning(...args);
+    for(let cb of callbacks) cb(value, ...args);
+    return value;
   };
 }
 
