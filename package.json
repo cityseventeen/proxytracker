@@ -1,6 +1,6 @@
 {
   "name": "proxy-tracker",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Nato per separare in modo semplice il controllo degli errori e il logging dalla logica dell'applicazione. Facilita l'uso di Proxy con handler complessi scrivendoli in una forma standardizzata. Permette di inserire funzioni \"spia\" tramite Proxy",
   "main": "proxy-tracker.js",
   "directories": {
