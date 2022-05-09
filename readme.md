@@ -7,6 +7,7 @@ come da pratiche di PragmaticProgrammer e CleanCode ai quali mi ispiro.
 Sull'uso di Proxy in Javascript. Ma per il classico Proxy, 
 la scrittura dell'handler dove inserire le "funzioni trappola" è piuttosto scomodo.
 
+### con il Proxy di javascript l'uso di handler è pesante
 Ne do un esempio. Mettiamo che tu voglia implementare una trappola per new classe,
 e per le funzioni chiamata nell'istanza.
 Dovresti scrivere per il classico Proxy:
@@ -40,7 +41,8 @@ get(target, prop, receiver){
 }
 ```
 
-Con ProxyTrack, basta scrivere questo:
+### Con ProxyTrack,
+basta scrivere questo:
 ```js
 const handler = [{construct: [callback_spia1, callback_logger, callback_check_error], get: callback_spia2},
                 {construct: {get: {apply: callback_logger}}}]
