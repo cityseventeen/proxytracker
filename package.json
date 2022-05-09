@@ -1,0 +1,29 @@
+{
+  "name": "proxy-tracker",
+  "version": "0.1.0",
+  "description": "Nato per separare in modo semplice il controllo degli errori e il logging dalla logica dell'applicazione. Facilita l'uso di Proxy con handler complessi scrivendoli in una forma standardizzata. Permette di inserire funzioni \"spia\" tramite Proxy",
+  "main": "proxy-extension.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "SET NODE_ENV=test&& node ./node_modules/mocha/bin/mocha",
+    "debug test": "npm test inspect"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CitySeventeen/ProxyTracker.git"
+  },
+  "keywords": [
+    "Proxy",
+    "Tracker",
+    "Track",
+    "Spy"
+  ],
+  "author": "Raffaele Balsamo <raffaelebalsamo91@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/CitySeventeen/ProxyTracker/issues"
+  },
+  "homepage": "https://github.com/CitySeventeen/ProxyTracker#readme"
+}
