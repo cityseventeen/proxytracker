@@ -3,4 +3,3 @@ nbproject
 
 # Dipendenze progetto e file lock
 node_modules/
-package-lock.json
