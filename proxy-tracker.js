@@ -154,6 +154,6 @@ function* scorriElementiGenerator(target){
 
 module.exports.ProxyExtension = ProxyExtension;
 module.exports.ProxyTracker = ProxyTracker;
-if(process.env.NODE_ENV === 'test'){
+if(process.env.NODE_ENV === 'dev'){
   module.exports.test = {generaHandlerForProxyTrack ,generaHandlerForProxy};
 }
