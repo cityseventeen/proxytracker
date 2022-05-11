@@ -2,7 +2,6 @@
 const {expect, assert} = require('chai');
 const util = require('util');
 
-process.env.NODE_ENV = 'test';
 const ambiente = process.env.NODE_ENV;
 
 const {ProxyExtension, ProxyTracker} = require(`../proxy-tracker.js`);
