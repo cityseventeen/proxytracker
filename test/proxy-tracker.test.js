@@ -35,27 +35,24 @@ describe('ProxyTracker - errori argomenti errati', () => { // la maggior parte d
   });
 });
 describe('inserimento delle callback', () => {
-  describe('in classe', ()=>{
+  let bridge;
+  function cb1(...args){bridge.push(`callback cb1 chiamata`);}
+  function cb2(...args){bridge.push(`callback cb2 chiamata`);}
+  function cb3(...args){bridge.push(`callback cb3 chiamata`);}
+  
+  beforeEach(()=>{
+    bridge = [];
+  });
+  
+  describe('combinazione di handler', () => {
     let classe;
-    let bridge;
-    function cb1(...args){bridge.push(`callback cb1 chiamata`);}
-    function cb2(...args){bridge.push(`callback cb2 chiamata`);}
-    function cb3(...args){bridge.push(`callback cb3 chiamata`);}
-
     beforeEach(()=>{
-      bridge = [];
       classe = class{
         constructor(arg){this.argomenti = arg; this.constr = 5; this.obj = {}}
         met1(){this.uno = 1; return 'called'}
         met2(arg){this.due = arg; return 'called'}
         static met3(){}
       };
-    });
-    it('handler = {construct: callback} inserisce la callback in construct', () => {
-      const handler = {construct: cb1};
-      let track = new ProxyTracker(classe, handler);
-      new track(5);
-      expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
     });
     it('handler = {construct: {get: {apply}}} inserisce la callback in apply e non in construct o get', () => {
       const handler = {construct: {get: {apply: cb1}}};
@@ -84,8 +81,6 @@ describe('inserimento delle callback', () => {
     it('inserisce 2 callback in construct, e una in get->apply', () => {
       const handler = [{construct: [cb1, cb3]},
                        {construct: {get: {apply: cb2}}}];
-
-
       let track = new ProxyTracker(classe, ...handler);
 
       track.met3;
@@ -100,6 +95,24 @@ describe('inserimento delle callback', () => {
       expect(bridge).to.eql([`callback cb1 chiamata`, `callback cb3 chiamata`, `callback cb2 chiamata`]);
       expect(istanza.met1(1,2)).to.satisfy((val)=>!util.types.isProxy(val));
     });
+  });
+  describe('in classe', ()=>{
+    let classe;
+    beforeEach(()=>{
+      classe = class{
+        constructor(arg){this.argomenti = arg; this.constr = 5; this.obj = {}}
+        met1(){this.uno = 1; return 'called'}
+        met2(arg){this.due = arg; return 'called'}
+        static met3(){}
+      };
+    });
+    it('handler = {construct: callback} inserisce la callback in construct', () => {
+      const handler = {construct: cb1};
+      let track = new ProxyTracker(classe, handler);
+      new track(5);
+      expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
+    });
+    
   });
 });
 
