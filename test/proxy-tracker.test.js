@@ -26,35 +26,8 @@ describe('ProxyTracker - errori argomenti errati', () => { // la maggior parte d
     for(let handler_errato of [5, 0, -8, 'stringa', function Construct(){}, [1,2,3], false, true, [function Construct(){}]])
       expect(()=>{new ProxyTracker(classe, handler_errato);}).to.throw(TypeError, 'handler deve essere un oggetto');
   });
-  it.skip('ProxyTracker(target, {callback anonima} -> errore', () => {
-    
-  });
-  it.skip('ProxyTracker(target, {callback non anonima}', () => {
-    
-  });
-  it.skip('ProxyTracker(target, {callback non anonima, callback anonima}', () => {
-    
-  });
-  it.skip('ProxyTracker(target, {callback non anonima, callback non anonima}', () => {
-    
-  });
-  it.skip('ProxyTracker(target, {callback non anonima}, {callback non anonima}', () => {
-    
-  });
-  it.skip('ProxyTracker(target, {nome: {callback non anonima}}', () => {
-    
-  });
-  it.skip('ProxyTracker(target, {nome: {callback anonima}} -> errore', () => {
-    
-  });
-  it.skip('ProxyTracker(target, {nome: {nome2: {callback non anonima}}}', () => {
-    
-  });
-  it.skip('ProxyTracker(target, {nome: {nome2: callback non anonima}}', () => {
-    
-  });
-  it.skip('ProxyTracker(target, {nome: {nome2: {callback}}}, {nome: {nome3: callback}}', () => {
-    
+  it('ProxyTracker(target, {callback anonima -> non esiste cb anonima, ma si chiama function } -> errore perché nome non appartiene a nome trappole', () => {
+    expect(()=>{new ProxyTracker(classe, {function(){}});}).to.throw('La trappola non è del tipo previsto da Proxy');
   });
 });
 describe('inserimento delle callback', () => {

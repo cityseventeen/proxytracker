@@ -77,28 +77,17 @@ if(ambiente === 'dev'){
       function cb2(){}
       function cb3(){}
       function cb8(){}
-      it.skip('handler = undefined -> no error', () => {
-        assert.doesNotThrow(()=>{generaHandlerForProxyTrack(undefined);});
-      });
-      it.skip('handler = callback anonima -> errore', () => {
-
-      });
-      it.skip('handler = callback -> return {callback}', () => {
-
-      });
-      it.skip('handler = {callback} -> return {callback}', () => {
-
-      });
-      it.skip('handler = {} o undefined -> return ..', () => {
-        
-      });
       it('handler = {} -> no error', () => {
-        let handler;
-        assert.doesNotThrow(()=>{handler = generaHandlerForProxyTrack({});});
+        assert.doesNotThrow(()=>{generaHandlerForProxyTrack({});});
       });
-      for(let value of [[], [1,2,3], ['nome']/*, null*/, true, false, 0, -8, 5, 'stringa']){
-        it.skip(`handler = ${util.inspect(value)} -> errore`, () => {
-          assert.throws(()=>{generaHandlerForProxyTrack(value);}, /elemento deve essere function, object, o array/);
+      for(let handler of [undefined, [], [1,2,3], ['nome']/*, null*/, true, false, 0, -8, 5, 'stringa']){
+        it(`handler = ${util.inspect(handler)} -> errore`, () => {
+          assert.throws(()=>{generaHandlerForProxyTrack(handler);}, 'handler deve essere un oggetto');
+        });
+      }
+      for(let handler of [{construct: 1}, {construct: [1,2,3]}, {construct: 'stringa'}, {construct: true}, {construct: undefined}]){
+        it(`handler = oggetto mal formato ${util.inspect(handler)}-> errore`, () => {
+          assert.throws(()=>{generaHandlerForProxyTrack(handler);}, 'elemento deve essere function, object, o array');
         });
       }
       it('handler = {callback con NOME} -> return expected', () => {
