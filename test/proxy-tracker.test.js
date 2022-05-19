@@ -9,75 +9,7 @@ const {ProxyExtension, ProxyTracker} = require(`../proxy-tracker.js`);
 const t = {};
 Object.freeze(t);
 
-describe('ProxyExtension', () => {
-  let classe;
-  beforeEach(()=>{
-    classe = class{
-      constructor(arg){this.argomenti = arg; this.constr = 5;}
-      met1(){this.uno = 1; return 'called'}
-      met2(arg){this.due = arg; return 'called'}
-    };
-  });
-  it('creazione proxy con handler {vuoto} -> no errore', () => {
-    expect(()=>{new ProxyExtension(classe, {});}).to.not.throw();
-    let proxy = new ProxyExtension(classe, {});
-    expect(()=>{new proxy();}).to.not.throw();
-  });
-  it.skip('creazioen proxy con handler {get} ->', () => {
-    // non va bene questo test, ho implmentato diversamente proxy-extension
-    const handler = {get: function(target, prop, receiver){
-                        return Reflect.get(...arguments);
-                        //return 'valore generato da proxy';
-                    }};
-    let proxy = new ProxyExtension(classe, handler);
-    let istanza = new proxy();
-    expect(istanza.constr).to.equal(5);
-    expect(istanza.parametro).to.equal('valore generato da proxy');
-  });
-  it('un solo handler = oggetto', () => {
-    const bridge = [];
-    const handler = {
-      construct:  function(target, arg, newtarget){
-        bridge.push('construct');
-        return  new target(...arg);
-      }
-    };
-    const proxy = new ProxyExtension(classe, handler);
-    let istanza;
-    expect(()=>{istanza = new proxy(2);}).to.not.throw();
-    expect(bridge).to.include.members(['construct']);
-    expect(istanza.met2(3)).to.equal('called');
-    expect(istanza.due).to.equal(3);
-    expect(istanza.constr).to.equal(5);
-    expect(istanza.argomenti).to.equal(2);
-  });
-  it('due handler, primo callback', () => {
-    const bridge = [];
-    const handler = (handler)=>{return{
-      construct:  function(target, arg, newtarget){
-        bridge.push('construct');
-        return  new Proxy(new target(...arg), handler);
-      }
-    }};
-    const handler_istanza = {
-      get(target, prop, receiver){
-        bridge.push('get');
-        return Reflect.get(...arguments);
-      }
-    };
-    const proxy = new ProxyExtension(classe, handler, handler_istanza);
-    let istanza;
-    expect(()=>{istanza = new proxy(2);}).to.not.throw();
-    expect(istanza.met2(3)).to.equal('called');
-    expect(istanza.due).to.equal(3);
-    expect(istanza.constr).to.equal(5);
-    expect(istanza.argomenti).to.equal(2);
-    expect(bridge).to.include.members(['construct', 'get']);
-  });
-  
-});
-
-describe('ProxyTracker', () => { // la maggior parte di questtest (che sono skip) li faccio quando integro la possibilità di inere anche callbackss sena bisgono di metterle in oun oggetto}
+describe('ProxyTracker - errori argomenti errati', () => { // la maggior parte di questtest (che sono skip) li faccio quando integro la possibilità di inere anche callbackss sena bisgono di metterle in oun oggetto}
   let classe;
   beforeEach(()=>{
     classe = class{
@@ -90,23 +22,11 @@ describe('ProxyTracker', () => { // la maggior parte di questtest (che sono skip
     expect(()=>{new ProxyTracker(classe)}).to.not.throw();
 
   });
-  it.skip('ProxyTracker(target, valore diverso da callaback e object) -> errore', () => {
-    expect(()=>{new ProxyTracker(classe, 5)}).to.throw(TypeError);
-    expect(()=>{new ProxyTracker(classe, 'stringa')}).to.throw(TypeError);
+  it('ProxyTracker(target, valore diverso da object) -> errore', () => {
+    for(let handler_errato of [5, 0, -8, 'stringa', function Construct(){}, [1,2,3], false, true, [function Construct(){}]])
+      expect(()=>{new ProxyTracker(classe, handler_errato);}).to.throw(TypeError, 'handler deve essere un oggetto');
   });
-  it.skip('ProxyTracker(target, callback anonima) -> errore', () => {
-    expect(()=>{new ProxyTracker(classe, ()=>{/* corpo */})}).to.throw(TypeError);
-  });
-  it.skip('ProxyTracker(target, callback non anonima, callback anonima) -> errore', () => {
-    expect(()=>{new ProxyTracker(classe, function f1(){}, ()=>{/* corpo */})}).to.throw(TypeError);
-  });
-  it.skip('ProxyTracker(target, callback) -> ', () => {
-    
-  });
-  it.skip('ProxyTracker(target, callback, callback, callback, ...) -> ', () => {
-    
-  });
-  it.skip('ProxyTracker(target, {callback anonima}', () => {
+  it.skip('ProxyTracker(target, {callback anonima} -> errore', () => {
     
   });
   it.skip('ProxyTracker(target, {callback non anonima}', () => {
@@ -136,73 +56,72 @@ describe('ProxyTracker', () => { // la maggior parte di questtest (che sono skip
   it.skip('ProxyTracker(target, {nome: {nome2: {callback}}}, {nome: {nome3: callback}}', () => {
     
   });
-  
-  describe('inserimento delle callback', () => {
-    describe('in classe', ()=>{
-      let classe;
-      let bridge;
-      function cb1(...args){bridge.push(`callback cb1 chiamata`);}
-      function cb2(...args){bridge.push(`callback cb2 chiamata`);}
-      function cb3(...args){bridge.push(`callback cb3 chiamata`);}
-      
-      beforeEach(()=>{
-        bridge = [];
-        classe = class{
-          constructor(arg){this.argomenti = arg; this.constr = 5; this.obj = {}}
-          met1(){this.uno = 1; return 'called'}
-          met2(arg){this.due = arg; return 'called'}
-          static met3(){}
-        };
-      });
-      it('handler = {construct: callback} inserisce la callback in construct', () => {
-        const handler = {construct: cb1};
-        let track = new ProxyTracker(classe, handler);
-        new track(5);
-        expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
-      });
-      it('handler = {construct: {get: {apply}}} inserisce la callback in apply e non in construct o get', () => {
-        const handler = {construct: {get: {apply: cb1}}};
-        
-        const {generaHandlerForProxyTrack} = require(`../proxy-tracker.js`).test;
-        let track = new ProxyTracker(classe, handler);
-   
-        let istanza = new track(5);
-        expect(bridge).to.be.an('array').that.not.include(`callback cb1 chiamata`);
-        istanza.met1;
-        expect(bridge).to.be.an('array').that.not.include(`callback cb1 chiamata`);
-        istanza.met1();
-        expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
-   
-      });
-      it('handler = {construct: callback}, {get: callback} inserisce la callback in construct, e in get, ma non in apply', () => {
-        const handler1 = {construct: cb1};
-        const handler2 = {get: cb2};
-        let track = new ProxyTracker(classe, handler1, handler2);
-        
-        track.met3;
-        expect(bridge).to.be.an('array').that.include(`callback cb2 chiamata`);
-        let istanza = new track(5);
-        expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
-      });
-      it('inserisce 2 callback in construct, e una in get->apply', () => {
-        const handler = [{construct: [cb1, cb3]},
-                         {construct: {get: {apply: cb2}}}];
-    
-          
-        let track = new ProxyTracker(classe, ...handler);
-        
-        track.met3;
-        expect(bridge).to.eql([]);
-        let istanza = new track(5);
-        expect(bridge).to.eql([`callback cb1 chiamata`, `callback cb3 chiamata`]);
-        expect(istanza.obj).to.satisfy((val)=>util.types.isProxy(val));
-        expect(bridge).to.eql([`callback cb1 chiamata`, `callback cb3 chiamata`]);
-        expect(istanza.met1).to.satisfy((val)=>util.types.isProxy(val));
-        expect(bridge).to.eql([`callback cb1 chiamata`, `callback cb3 chiamata`]);
-        expect(istanza.met1(1,2)).to.eql('called');
-        expect(bridge).to.eql([`callback cb1 chiamata`, `callback cb3 chiamata`, `callback cb2 chiamata`]);
-        expect(istanza.met1(1,2)).to.satisfy((val)=>!util.types.isProxy(val));
-      });
+});
+describe('inserimento delle callback', () => {
+  describe('in classe', ()=>{
+    let classe;
+    let bridge;
+    function cb1(...args){bridge.push(`callback cb1 chiamata`);}
+    function cb2(...args){bridge.push(`callback cb2 chiamata`);}
+    function cb3(...args){bridge.push(`callback cb3 chiamata`);}
+
+    beforeEach(()=>{
+      bridge = [];
+      classe = class{
+        constructor(arg){this.argomenti = arg; this.constr = 5; this.obj = {}}
+        met1(){this.uno = 1; return 'called'}
+        met2(arg){this.due = arg; return 'called'}
+        static met3(){}
+      };
+    });
+    it('handler = {construct: callback} inserisce la callback in construct', () => {
+      const handler = {construct: cb1};
+      let track = new ProxyTracker(classe, handler);
+      new track(5);
+      expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
+    });
+    it('handler = {construct: {get: {apply}}} inserisce la callback in apply e non in construct o get', () => {
+      const handler = {construct: {get: {apply: cb1}}};
+
+      const {generaHandlerForProxyTrack} = require(`../proxy-tracker.js`).test;
+      let track = new ProxyTracker(classe, handler);
+
+      let istanza = new track(5);
+      expect(bridge).to.be.an('array').that.not.include(`callback cb1 chiamata`);
+      istanza.met1;
+      expect(bridge).to.be.an('array').that.not.include(`callback cb1 chiamata`);
+      istanza.met1();
+      expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
+
+    });
+    it('handler = {construct: callback}, {get: callback} inserisce la callback in construct, e in get, ma non in apply', () => {
+      const handler1 = {construct: cb1};
+      const handler2 = {get: cb2};
+      let track = new ProxyTracker(classe, handler1, handler2);
+
+      track.met3;
+      expect(bridge).to.be.an('array').that.include(`callback cb2 chiamata`);
+      let istanza = new track(5);
+      expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
+    });
+    it('inserisce 2 callback in construct, e una in get->apply', () => {
+      const handler = [{construct: [cb1, cb3]},
+                       {construct: {get: {apply: cb2}}}];
+
+
+      let track = new ProxyTracker(classe, ...handler);
+
+      track.met3;
+      expect(bridge).to.eql([]);
+      let istanza = new track(5);
+      expect(bridge).to.eql([`callback cb1 chiamata`, `callback cb3 chiamata`]);
+      expect(istanza.obj).to.satisfy((val)=>util.types.isProxy(val));
+      expect(bridge).to.eql([`callback cb1 chiamata`, `callback cb3 chiamata`]);
+      expect(istanza.met1).to.satisfy((val)=>util.types.isProxy(val));
+      expect(bridge).to.eql([`callback cb1 chiamata`, `callback cb3 chiamata`]);
+      expect(istanza.met1(1,2)).to.eql('called');
+      expect(bridge).to.eql([`callback cb1 chiamata`, `callback cb3 chiamata`, `callback cb2 chiamata`]);
+      expect(istanza.met1(1,2)).to.satisfy((val)=>!util.types.isProxy(val));
     });
   });
 });
@@ -210,14 +129,14 @@ describe('ProxyTracker', () => { // la maggior parte di questtest (che sono skip
 if(ambiente === 'dev'){
   const {generaHandlerForProxyTrack ,generaHandlerForProxy} = require(`../proxy-tracker.js`).test;
   describe('test funzioni interne', () => {
-    describe('generaHandler', () => {
+    describe('generaHandler - diverse prove', () => {
       it('handler_track vuoto, {} -> return {}', () => {
         assert.deepEqual(generaHandlerForProxy(undefined), {});
         assert.deepEqual(generaHandlerForProxy({}), {});
       });
       it('handler_track con parametro non incluso nelle trappole di Proxy -> errore', () => {
         const handler = {nonesistenelproxy(arg){}};
-        assert.throws(()=>{generaHandlerForProxy(handler);}, TypeError);
+        assert.throws(()=>{generaHandlerForProxy(handler);}, TypeError, 'La trappola non è del tipo previsto da Proxy');
       });
       describe('handler_track con solo un parametro ritorna un oggetto con una sola funzione', () => {
         it('che ha solo una callback', () => {
@@ -270,7 +189,7 @@ if(ambiente === 'dev'){
       });
   
     });
-    describe('genera handlers track', () => { // la maggior parte di questtest (che sono skip) li faccio quando integro la possibilità di inere anche callbackss sena bisgono di metterle in oun oggetto}
+    describe('genera handlers track - diverse prove', () => { // la maggior parte di questtest (che sono skip) li faccio quando integro la possibilità di inere anche callbackss sena bisgono di metterle in oun oggetto}
       function cb1(){}
       function cb2(){}
       function cb3(){}
@@ -278,18 +197,6 @@ if(ambiente === 'dev'){
       it.skip('handler = undefined -> no error', () => {
         assert.doesNotThrow(()=>{generaHandlerForProxyTrack(undefined);});
       });
-      it('handler = {} -> no error', () => {
-        let handler;
-        assert.doesNotThrow(()=>{handler = generaHandlerForProxyTrack({});});
-      });
-      it.skip('handler = {} o undefined -> return ..', () => {
-        
-      });
-      for(let value of [[], [1,2,3], ['nome']/*, null*/, true, false, 0, -8, 5, 'stringa']){
-        it.skip(`handler = ${util.inspect(value)} -> errore`, () => {
-          assert.throws(()=>{generaHandlerForProxyTrack(value);}, /elemento deve essere function, object, o array/);
-        });
-      }
       it.skip('handler = callback anonima -> errore', () => {
 
       });
@@ -299,6 +206,18 @@ if(ambiente === 'dev'){
       it.skip('handler = {callback} -> return {callback}', () => {
 
       });
+      it.skip('handler = {} o undefined -> return ..', () => {
+        
+      });
+      it('handler = {} -> no error', () => {
+        let handler;
+        assert.doesNotThrow(()=>{handler = generaHandlerForProxyTrack({});});
+      });
+      for(let value of [[], [1,2,3], ['nome']/*, null*/, true, false, 0, -8, 5, 'stringa']){
+        it.skip(`handler = ${util.inspect(value)} -> errore`, () => {
+          assert.throws(()=>{generaHandlerForProxyTrack(value);}, /elemento deve essere function, object, o array/);
+        });
+      }
       it('handler = {callback con NOME} -> return expected', () => {
         const handler = {cb1};
         const handler_track = generaHandlerForProxyTrack(handler);

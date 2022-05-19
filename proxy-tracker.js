@@ -103,7 +103,7 @@ function puntatoreRiferimento(riferimento, name){
 }
 function checkArgsForGeneraHandlersTrack(...args){
   for(let arg of args){
-    if(!(typeof arg === 'object' && !Array.isArray(arg))) throw new err.ToDevelop(typeof arg);
+    if(!(typeof arg === 'object' && !Array.isArray(arg))) throw new TypeError('handler deve essere un oggetto');
   }
 }
 function unisciHandlersRicorsivo(handler_track, ...elements){
@@ -124,7 +124,7 @@ function unisciHandlersRicorsivo(handler_track, ...elements){
   }
   
 }
-function pushCallback(handler, func){ // da usarquando uniscihandlers permettera di prendere il nome dalle callback
+function pushCallback(handler, func){
   handler.cbs.push(func);
 }
 function insertSubHandler(riferimento, name){
