@@ -8,6 +8,7 @@
   },
   "scripts": {
     "test": "NODE_ENV=dev node ./node_modules/mocha/bin/mocha",
+    "test windows": "SET NODE_ENV=dev& node ./node_modules/mocha/bin/mocha",
     "debug test": "npm test inspect"
   },
   "repository": {

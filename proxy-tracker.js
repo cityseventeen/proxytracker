@@ -1,6 +1,6 @@
 /* global Function, Reflect */
 
-const assert = require('chai').assert;
+const assert = require('assert');
 
 const err = require('./lib/errorC.js');
 
