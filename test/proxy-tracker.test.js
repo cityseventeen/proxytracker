@@ -18,8 +18,12 @@ describe('ProxyTracker - errori argomenti errati', () => { // la maggior parte d
       met2(arg){this.due = arg; return 'called'}
     };
   });
-  it('ProxyTracker(target, nulla) -> no errore ->', () => {
-    expect(()=>{new ProxyTracker(classe)}).to.not.throw();
+  it('ProxyTracker(target, nulla) -> errore ->', () => {
+    expect(()=>{new ProxyTracker(classe);}).to.throw();
+
+  });
+  it('ProxyTracker(target, undefined) -> errore ->', () => {
+    expect(()=>{new ProxyTracker(classe);}).to.throw();
 
   });
   it('ProxyTracker(target, valore diverso da object) -> errore', () => {
