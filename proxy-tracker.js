@@ -65,19 +65,19 @@ function splitCallbackObject(list){
 }
 function returnEndingTrapFromList(metodo, handler){
   const no_alterated_traps_list = {
-     apply(target, thisArg, args){return target.apply(thisArg, args);},
-     construct(target, args, newtarget){return new target(target, ...args);},
-     defineProperty(target, key, descriptor){throw new err.ToDevelop('trappola non sviluppata');},
-     deletProperty(target, prop){throw new err.ToDevelop('trappola non sviluppata');},
-     get(target, prop, receiver){return Reflect.get(target, prop, receiver);},
-     getOwnPropertyDescriptor(target, prop){throw new err.ToDevelop('trappola non sviluppata');},
-     getPrototypeOf(target){throw new err.ToDevelop('trappola non sviluppata');},
-     has(target, prop){throw new err.ToDevelop('trappola non sviluppata');},
-     isExtensible(target){throw new err.ToDevelop('trappola non sviluppata');},
-     ownKeys(target){throw new err.ToDevelop('trappola non sviluppata');},
-     preventExtensions(target){throw new err.ToDevelop('trappola non sviluppata');},
-     set(target, property, value, receiver){throw new err.ToDevelop('trappola non sviluppata');},
-     setPrototypeOf(target, prototype){throw new err.ToDevelop('trappola non sviluppata');}
+     apply(target, thisArg, args){return Reflect.apply(...arguments);},
+     construct(target, args, newtarget){return Reflect.construct(...arguments);},
+     defineProperty(target, property, descriptor){return Reflect.defineProperty(...arguments);},
+     deleteProperty(target, prop){return Reflect.deleteProperty(...arguments);},
+     get(target, prop, receiver){return Reflect.get(...arguments);},
+     getOwnPropertyDescriptor(target, prop){return Reflect.getOwnPropertyDescriptor(...arguments);},
+     getPrototypeOf(target){return Reflect.getPrototypeOf(...arguments);},
+     has(target, prop){return Reflect.has(...arguments);},
+     isExtensible(target){return Reflect.isExtensible(...arguments);},
+     ownKeys(target){return Reflect.ownKeys(...arguments);},
+     preventExtensions(target){return Reflect.preventExtensions(...arguments);},
+     set(target, property, value, receiver){return Reflect.set(...arguments);},
+     setPrototypeOf(target, prototype){return Reflect.setPrototypeOf(...arguments);}
   };
   let trap = no_alterated_traps_list[metodo];
   if(trap === undefined) throw new TypeError(`La trappola non è del tipo previsto da Proxy, ma è ${metodo}`);

@@ -39,6 +39,7 @@ describe('inserimento delle callback', () => {
   function cb1(...args){bridge.push(`callback cb1 chiamata`);}
   function cb2(...args){bridge.push(`callback cb2 chiamata`);}
   function cb3(...args){bridge.push(`callback cb3 chiamata`);}
+  const cbs = {cb1, cb2, cb3};
   
   beforeEach(()=>{
     bridge = [];
@@ -96,23 +97,212 @@ describe('inserimento delle callback', () => {
       expect(istanza.met1(1,2)).to.satisfy((val)=>!util.types.isProxy(val));
     });
   });
+  
+
   describe('in classe', ()=>{
-    let classe;
-    beforeEach(()=>{
-      classe = class{
-        constructor(arg){this.argomenti = arg; this.constr = 5; this.obj = {}}
-        met1(){this.uno = 1; return 'called'}
-        met2(arg){this.due = arg; return 'called'}
-        static met3(){}
-      };
-    });
-    it('handler = {construct: callback} inserisce la callback in construct', () => {
-      const handler = {construct: cb1};
-      let track = new ProxyTracker(classe, handler);
-      new track(5);
-      expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
-    });
+    class classe{
+      static paramstatic = 8;
+      constructor(arg){this.argomenti = arg; this.constr = 5; this.obj = {};}
+      met1(){this.uno = 1; return 'called';}
+      met2(arg){this.due = arg; return 'called';}
+      static met3(){}
+    }
+    const testTrap = new testTrapGenerator(classe);
     
+    for(let trap of   ['construct', 'get', 'defineProperty', 'deleteProperty',
+                      'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
+                      'isExtensible', 'ownKeys', 'preventExtensions', 'set',
+                      'setPrototypeOf'])
+    {
+       testTrap[trap]();                             
+    }
   });
+  describe('in oggetto', ()=>{
+    const object = {param: 5, metodo(){return 8;}};
+    const testTrap = new testTrapGenerator(object);
+    
+    for(let trap of   ['get', 'defineProperty', 'deleteProperty',
+                      'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
+                      'isExtensible', 'ownKeys', 'preventExtensions', 'set',
+                      'setPrototypeOf'])
+    {
+       testTrap[trap]();                             
+    }
+  });
+  describe('in funzione', ()=>{
+    const funzione = function(){};
+    const testTrap = new testTrapGenerator(funzione);
+    
+    for(let trap of   ['construct', 'apply', 'get', 'defineProperty', 'deleteProperty',
+                      'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
+                      'isExtensible', 'ownKeys', 'preventExtensions', 'set',
+                      'setPrototypeOf'])
+    {
+       testTrap[trap]();                             
+    }
+  });
+  describe('in array', ()=>{
+    const array = [];
+    const testTrap = new testTrapGenerator(array);
+    
+    for(let trap of   ['get', 'defineProperty', 'deleteProperty',
+                      'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
+                      'isExtensible', 'ownKeys', 'preventExtensions', 'set',
+                      'setPrototypeOf'])
+    {
+       testTrap[trap]();                             
+    }
+  });
+  
+  function testTrapGenerator(entita){
+    this.apply = function(){
+      it('handler = {apply: callback} inserisce la callback in apply', () => {
+        const handler = {apply: cbs.cb1};
+        let track = new ProxyTracker(entita, handler);
+        track();
+        expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
+      });
+    };
+    this.construct = function(){
+      it('handler = {construct: callback} inserisce la callback in construct', () => {
+        const handler = {construct: cbs.cb1};
+        let track = new ProxyTracker(entita, handler);
+        new track(5);
+        expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
+      });
+    };
+    this.defineProperty = function(){
+      it('handler = {defineProperty: callback} inserisce la callback in defineProperty', () => {
+        const handler = {defineProperty: cbs.cb1};
+        let track = new ProxyTracker(entita, handler);
+        track.new_prop = 'valore';
+        expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
+      });
+      it('handler = {defineProperty: callback} inserisce la callback in defineProperty', () => {
+        const handler = {defineProperty: cbs.cb1};
+        let track = new ProxyTracker(entita, handler);
+        Object.defineProperty(track, 'new_prop', {value: 8});
+        expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
+      });
+    };
+    this.deleteProperty = function(){
+      it('handler = {deleteProperty: callback} inserisce la callback in deleteProperty', () => {
+        const handler = {deleteProperty: cbs.cb1};
+        let track = new ProxyTracker(entita, handler);
+        Reflect.deleteProperty(track, 'prop');
+        expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
+      });
+      it('handler = {deleteProperty: callback} inserisce la callback in deleteProperty', () => {
+        const handler = {deleteProperty: cbs.cb1};
+        let track = new ProxyTracker(entita, handler);
+        delete track.parametro;
+        expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
+      });
+    };
+    this.get = function(){
+      it('handler = {get: callback} inserisce la callback in get', () => {
+        const handler = {get: cbs.cb1};
+        let track = new ProxyTracker(entita, handler);
+        track.parametro;
+        expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
+      });
+    };
+    this.getOwnPropertyDescriptor = function(){
+      it('handler = {getOwnPropertyDescriptor: callback} inserisce la callback in getOwnPropertyDescriptor', () => {
+        const handler = {getOwnPropertyDescriptor: cbs.cb1};
+        let track = new ProxyTracker(entita, handler);
+        Object.getOwnPropertyDescriptor(track, 'prop');
+        expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
+      });
+    };
+    this.getPrototypeOf = function(){
+      it('handler = {getPrototypeOf: callback} inserisce la callback in getPrototypeOf', () => {
+        const handler = {getPrototypeOf: cbs.cb1};
+        let track = new ProxyTracker(entita, handler);
+        Object.getPrototypeOf(track);
+        expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
+      });
+      it('handler = {getPrototypeOf: callback} inserisce la callback in getPrototypeOf', () => {
+        const handler = {getPrototypeOf: cbs.cb1};
+        let track = new ProxyTracker(entita, handler);
+        track instanceof Object;
+        expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
+      });
+    };
+    this.has = function(){
+      it('handler = {has: callback} inserisce la callback in has', () => {
+        const handler = {has: cbs.cb1};
+        let track = new ProxyTracker(entita, handler);
+        'param' in track;
+        expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
+      });
+      it('handler = {has: callback} inserisce la callback in has', () => {
+        const handler = {has: cbs.cb1};
+        let track = new ProxyTracker(entita, handler);
+        Reflect.has(track, 'param');
+        expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
+      });
+    };
+    this.isExtensible = function(){
+      it('handler = {isExtensible: callback} inserisce la callback in isExtensible', () => {
+        const handler = {isExtensible: cbs.cb1};
+        let track = new ProxyTracker(entita, handler);
+        Object.isExtensible(track);
+        expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
+      });
+    };
+    this.ownKeys = function(){
+      it('handler = {ownKeys: callback} inserisce la callback in ownKeys', () => {
+        const handler = {ownKeys: cbs.cb1};
+        let track = new ProxyTracker(entita, handler);
+        Object.keys(track);
+        expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
+      });
+      it('handler = {ownKeys: callback} inserisce la callback in ownKeys', () => {
+        const handler = {ownKeys: cbs.cb1};
+        let track = new ProxyTracker(entita, handler);
+        Object.getOwnPropertyNames(track);
+        expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
+      });
+    };
+    this.preventExtensions = function(){
+      it('handler = {preventExtensions: callback} inserisce la callback in preventExtensions', () => {
+        const handler = {preventExtensions: cbs.cb1};
+        let track = new ProxyTracker(entita, handler);
+        Object.seal(track);
+        expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
+      });
+      it('handler = {preventExtensions: callback} inserisce la callback in preventExtensions', () => {
+        const handler = {preventExtensions: cbs.cb1};
+        let track = new ProxyTracker(entita, handler);
+        Object.freeze(track);
+        expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
+      });
+      it('handler = {preventExtensions: callback} inserisce la callback in preventExtensions', () => {
+        const handler = {preventExtensions: cbs.cb1};
+        let track = new ProxyTracker(entita, handler);
+        Object.preventExtensions(track);
+        expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
+      });
+    };
+    this.set = function(){
+      it('handler = {set: callback} inserisce la callback in set', () => {
+        const handler = {set: cbs.cb1};
+        let track = new ProxyTracker(entita, handler);
+        track.parametro = 8;
+        expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
+      });
+    };
+    this.setPrototypeOf = function(){
+      it('handler = {setPrototypeOf: callback} inserisce la callback in setPrototypeOf', () => {
+        const handler = {setPrototypeOf: cbs.cb1};
+        let track = new ProxyTracker(entita, handler);
+        Reflect.setPrototypeOf(track, {});
+        expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
+      });
+    };
+    
+  };
 });
+
 
