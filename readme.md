@@ -51,7 +51,4 @@ Fine. Solo questo.
 
 Non ci sono più scuse per tenere separati logica e logger/controllo.
 
-### Cosa puoi utilizzare di ProxyTrack
-Al momento sono state sviluppate e testate le trappole Construct, Get, Apply. A presto la copertura di tutte le trappole del `Proxy`
-
 
