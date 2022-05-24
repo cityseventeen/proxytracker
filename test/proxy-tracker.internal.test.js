@@ -65,13 +65,33 @@ if(ambiente === 'dev'){
           const handler_track = {construct: [callback_da_applicare, callback_da_applicare, {get: [handler_track_innestato2]}, callback_da_applicare],
                                  apply: [handler_track_innestato, callback_da_applicare]};
           const handler_generato = generaHandlerForProxy(handler_track);
-          expect(handler_generato).to.be.an('object').that.have.all.keys('apply', 'construct')
+          expect(handler_generato).to.be.an('object').that.have.all.keys('apply', 'construct');
           expect(handler_generato).have.property('construct').that.to.be.a('function');
           expect(handler_generato).have.property('apply').that.to.be.a('function');
         });
       });
   
     });
+    describe('genera handlers track - funzioni non anonime', () => {
+      const function_fake_anonymous = function(){};
+      const function_that_return_anonymous = function(){return function(){};};
+      const function_named_that_return_anonymous = function name_function(){return function(){};};
+      
+      const handlers = [{type: 'function(){}', handler: {get: function(){}}},
+                        {type: 'name_function', handler: {get: function_fake_anonymous}},
+                        {type: 'function_that_return_function', handler: {apply: function_that_return_anonymous()}},
+                        {type: 'function_that_return_function', handler: {apply: function_named_that_return_anonymous()}}
+      ];
+      for(let h of handlers){
+        it(`{trap: ${h.type}} non è anonima`, () => {
+          expectFunctionIsntAnonymous(h.handler);
+       });
+      }
+    });
+    function expectFunctionIsntAnonymous(handler){
+      assert.doesNotThrow(()=>{generaHandlerForProxyTrack(handler);});
+    }
+    
     describe('genera handlers track - diverse prove', () => { // la maggior parte di questtest (che sono skip) li faccio quando integro la possibilità di inere anche callbackss sena bisgono di metterle in oun oggetto}
       function cb1(){}
       function cb2(){}
@@ -85,7 +105,9 @@ if(ambiente === 'dev'){
           assert.throws(()=>{generaHandlerForProxyTrack(handler);}, 'handler deve essere un oggetto');
         });
       }
-      for(let handler of [{construct: 1}, {construct: [1,2,3]}, {construct: 'stringa'}, {construct: true}, {construct: undefined}]){
+      for(let handler of [{construct: 1}, {construct: 0}, {construct: -8}, {construct: true}, {construct: false},
+                          {construct: [1,2,3]}, {construct: 'stringa'}, {construct: true}, {construct: undefined}])
+      {
         it(`handler = oggetto mal formato ${util.inspect(handler)}-> errore`, () => {
           assert.throws(()=>{generaHandlerForProxyTrack(handler);}, 'elemento deve essere function, object, o array');
         });

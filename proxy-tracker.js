@@ -1,6 +1,6 @@
 /* global Function, Reflect */
 
-const assert = require('assert');
+const assert = require('assert').strict;
 
 const err = require('./lib/errorC.js');
 
@@ -145,7 +145,7 @@ function insertSubHandler(riferimento, name){
 }
 
 function ifElementInvalidThrowError(element){
-  assert(     ((typeof element === 'function' && !isAnonymousFunction(element))
+  assert(     ((typeof element === 'function')
           ||  (typeof element === 'object' && !Array.isArray(element))
           ||   Array.isArray(element)), `ricevuto ${typeof element}. elemento deve essere function, object, o array`);
 }
