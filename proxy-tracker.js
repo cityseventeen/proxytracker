@@ -64,7 +64,7 @@ function splitCallbackObject(list){
           hds: list.hds};
 }
 function returnEndingTrapFromList(metodo, handler){
-  const no_alterated_traps_list = {
+  const ending_of_trap_list = {
      apply(target, thisArg, args){return Reflect.apply(...arguments);},
      construct(target, args, newtarget){return Reflect.construct(...arguments);},
      defineProperty(target, property, descriptor){return Reflect.defineProperty(...arguments);},
@@ -79,9 +79,9 @@ function returnEndingTrapFromList(metodo, handler){
      set(target, property, value, receiver){return Reflect.set(...arguments);},
      setPrototypeOf(target, prototype){return Reflect.setPrototypeOf(...arguments);}
   };
-  let trap = no_alterated_traps_list[metodo];
-  if(trap === undefined) throw new TypeError(`La trappola non è del tipo previsto da Proxy, ma è ${metodo}`);
-  return (...args)=>{let value = trap(...args); return returnProxyOrValue(value, handler);};
+  let ending_trap = ending_of_trap_list[metodo];
+  if(ending_trap === undefined) throw new TypeError(`La trappola non è del tipo previsto da Proxy, ma è ${metodo}`);
+  return (...args)=>{let value_returned_by_trap = ending_trap(...args); return returnProxyOrValue(value_returned_by_trap, handler);};
 
   function returnProxyOrValue(value, handler){
     if((value instanceof Function || typeof value === 'object') && typeof handler === 'object')
