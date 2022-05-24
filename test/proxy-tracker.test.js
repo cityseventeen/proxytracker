@@ -117,6 +117,24 @@ describe('inserimento delle callback', () => {
        testTrap[trap]();                             
     }
   });
+  describe('in classe derivata', () => {
+    class base{
+      constructor(arg){this.base = arg;}
+    }
+    class derivata extends base{
+      constructor(arg){super(arg); this.derivata = arg + 100;}
+      metodo_derivata(){this.metodo = 8; return 'qualcosa'}
+    }
+    const testTrap = new testTrapGenerator(derivata);
+    
+    for(let trap of   ['construct', 'get', 'defineProperty', 'deleteProperty',
+                      'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
+                      'isExtensible', 'ownKeys', 'preventExtensions', 'set',
+                      'setPrototypeOf'])
+    {
+       testTrap[trap]();                             
+    }
+  });
   describe('in oggetto', ()=>{
     const object = {param: 5, metodo(){return 8;}};
     const testTrap = new testTrapGenerator(object);
