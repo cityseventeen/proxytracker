@@ -54,7 +54,7 @@ describe('ProxyTracker - Interfaccia argomenti errati o giusti', () => {
       expect(()=>{new ProxyTracker(target_wrong, handler_corretto);}).to.throw('Cannot create proxy with a non-object');
     });
   }
-  for(let target_corretto of [{}, class classe{}, String, Number, Object, Array]){
+  for(let target_corretto of [{}, [], class classe{}, String, Number, Object, Array]){
     expect(()=>{new ProxyTracker(target_corretto, handler_corretto);}).to.not.throw();
   }
 });
