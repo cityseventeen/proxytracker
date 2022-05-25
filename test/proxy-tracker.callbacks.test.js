@@ -107,7 +107,8 @@ describe('inserimento delle callback', () => {
       {title: 'native Array', entita: Array, traps: t.lista_all_traps_except()},
       {title: 'native String', entita: String, traps: t.lista_all_traps_except()},
       {title: 'native Object', entita: Object, traps: t.lista_all_traps_except()},
-      {title: 'native Number', entita: Number, traps: t.lista_all_traps_except()}                               
+      {title: 'native Number', entita: Number, traps: t.lista_all_traps_except()},
+      {title: 'native Function', entita: Function, traps: t.lista_all_traps_except()}
     ];
     
     
