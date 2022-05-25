@@ -49,11 +49,13 @@ describe('ProxyTracker - errori argomenti errati', () => { // la maggior parte d
   it('ProxyTracker(target, {callback anonima -> non esiste cb anonima, ma si chiama function } -> errore perché nome non appartiene a nome trappole', () => {
     expect(()=>{new ProxyTracker(classe, {function(){}});}).to.throw('La trappola non è del tipo previsto da Proxy');
   });
-  for(let target_wrong of [undefined, 0, -8, 5, true, false]){
-    it.only(`ProxyTracker(target_wrong, handler corretto) -> errore`, () => {
+  for(let target_wrong of [undefined, 0, -8, 5, true, false, "string"]){
+    it(`ProxyTracker(target_wrong, handler corretto) -> errore`, () => {
       expect(()=>{new ProxyTracker(target_wrong, handler_corretto);}).to.throw('Cannot create proxy with a non-object');
     });
-
+  }
+  for(let target_corretto of [{}, class classe{}, String, Number, Object, Array]){
+    expect(()=>{new ProxyTracker(target_corretto, handler_corretto);}).to.not.throw();
   }
 });
 describe('inserimento delle callback', () => {
@@ -196,6 +198,9 @@ describe('inserimento delle callback', () => {
       }
     });
 
+
+
+  }  
   function testTrapGenerator(entita, value_returned_is_proxy){
     const any_trap = 'get';
     const forceToReturnProxy = function(from_trap){
@@ -371,6 +376,7 @@ describe('inserimento delle callback', () => {
     
   };
 });
-  
+
+
 
 
