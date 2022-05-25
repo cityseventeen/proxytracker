@@ -6,7 +6,10 @@ const ambiente = process.env.NODE_ENV;
 
 const {ProxyExtension, ProxyTracker} = require(`../proxy-tracker.js`);
 
-const t = {};
+const t = {list_all_traps: ['apply', 'get', 'construct', 'defineProperty', 'deleteProperty',
+                  'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
+                  'isExtensible', 'ownKeys', 'preventExtensions', 'set',
+                  'setPrototypeOf']};
 Object.freeze(t);
 
 describe('inserimento delle callback', () => {
@@ -74,83 +77,59 @@ describe('inserimento delle callback', () => {
   });
   
   for(let test of [{title: 'trap doesnt return proxy, but real value', flag: false}]){
-    describe(`in classe with ${test.title}`, ()=>{
-      class classe{
-        static paramstatic = 8;
-        constructor(arg){this.argomenti = arg; this.constr = 5; this.obj = {};}
-        met1(){this.uno = 1; return 'called';}
-        met2(arg){this.due = arg; return 'called';}
-        static met3(){}
-        static oggetto = {}
-      }
-      const testTrap = new testTrapGenerator(classe, test.flag);
+    class classe{
+          static paramstatic = 8;
+          constructor(arg){this.argomenti = arg; this.constr = 5; this.obj = {};}
+          met1(){this.uno = 1; return 'called';}
+          met2(arg){this.due = arg; return 'called';}
+          static met3(){}
+          static oggetto = {}
+        }
+        
+    class base{
+      constructor(arg){this.base = arg;}
+    }
+    class classe_derivata extends base{
+      constructor(arg){super(arg); this.derivata = arg + 100;}
+      metodo_derivata(){this.metodo = 8; return 'qualcosa';}
+      static oggetto = {}
+    }
+    const object = {param: 5, metodo(){return 8;}, oggetto: {}};
+    
+    const list_target = [
+      {title: 'class', entita: classe, traps: ['construct', 'get', 'defineProperty', 'deleteProperty',
+                                                'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
+                                                'isExtensible', 'ownKeys', 'preventExtensions', 'set',
+                                                'setPrototypeOf']},
+      {title: 'class derivata', entita: classe_derivata, traps: ['construct', 'get', 'defineProperty', 'deleteProperty',
+                                                                'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
+                                                                'isExtensible', 'ownKeys', 'preventExtensions', 'set',
+                                                                'setPrototypeOf']},
+      {title: 'oggetto', entita: object, traps: ['get', 'defineProperty', 'deleteProperty',
+                                                  'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
+                                                  'isExtensible', 'ownKeys', 'preventExtensions', 'set',
+                                                  'setPrototypeOf']},
+      {title: 'funzione', entita: function(){}, traps: ['construct', 'apply', 'get', 'defineProperty', 'deleteProperty',
+                                                  'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
+                                                  'isExtensible', 'ownKeys', 'preventExtensions', 'set',
+                                                  'setPrototypeOf']},
+      {title: 'array []', entita: [], traps: ['get', 'defineProperty', 'deleteProperty',
+                                              'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
+                                              'isExtensible', 'ownKeys', 'preventExtensions', 'set',
+                                              'setPrototypeOf']}
+    ];
+    
+    
+    for(let type_target of list_target){
+      describe.only(`inserimento callbacks is ${type_target.title} with ${test.title}`, ()=>{
+        const testTrap = new testTrapGenerator(type_target.entita, test.flag);
 
-      for(let trap of   ['construct', 'get', 'defineProperty', 'deleteProperty',
-                        'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
-                        'isExtensible', 'ownKeys', 'preventExtensions', 'set',
-                        'setPrototypeOf'])
-      {
-         testTrap[trap]();                             
-      }
-    });
-    describe(`in classe derivata with ${test.title}`, () => {
-      class base{
-        constructor(arg){this.base = arg;}
-      }
-      class derivata extends base{
-        constructor(arg){super(arg); this.derivata = arg + 100;}
-        metodo_derivata(){this.metodo = 8; return 'qualcosa';}
-        static oggetto = {}
-      }
-      const testTrap = new testTrapGenerator(derivata, test.flag);
-
-      for(let trap of   ['construct', 'get', 'defineProperty', 'deleteProperty',
-                        'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
-                        'isExtensible', 'ownKeys', 'preventExtensions', 'set',
-                        'setPrototypeOf'])
-      {
-         testTrap[trap]();                             
-      }
-    });
-    describe(`in oggetto with ${test.title}`, ()=>{
-      const object = {param: 5, metodo(){return 8;}, oggetto: {}};
-      const testTrap = new testTrapGenerator(object, test.flag);
-
-      for(let trap of   ['get', 'defineProperty', 'deleteProperty',
-                        'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
-                        'isExtensible', 'ownKeys', 'preventExtensions', 'set',
-                        'setPrototypeOf'])
-      {
-         testTrap[trap]();                             
-      }
-    });
-    describe(`in funzione with ${test.title}`, ()=>{
-      const funzione = function(){};
-      const testTrap = new testTrapGenerator(funzione, test.flag);
-
-      for(let trap of   ['construct', 'apply', 'get', 'defineProperty', 'deleteProperty',
-                        'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
-                        'isExtensible', 'ownKeys', 'preventExtensions', 'set',
-                        'setPrototypeOf'])
-      {
-         testTrap[trap]();                             
-      }
-    });
-    describe(`in array with ${test.title}`, ()=>{
-      const array = [];
-      const testTrap = new testTrapGenerator(array, test.flag);
-
-      for(let trap of   ['get', 'defineProperty', 'deleteProperty',
-                        'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
-                        'isExtensible', 'ownKeys', 'preventExtensions', 'set',
-                        'setPrototypeOf'])
-      {
-         testTrap[trap]();                             
-      }
-    });
-
-
-
+        for(let trap of   type_target.traps)
+        {
+           testTrap[trap]();                             
+        }
+      });
+    }
   }  
   function testTrapGenerator(entita, value_returned_is_proxy){
     const any_trap = 'get';
