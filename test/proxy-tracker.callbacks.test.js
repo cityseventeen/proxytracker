@@ -116,15 +116,31 @@ describe('inserimento delle callback', () => {
       {title: 'array []', entita: [], traps: ['get', 'defineProperty', 'deleteProperty',
                                               'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
                                               'isExtensible', 'ownKeys', 'preventExtensions', 'set',
-                                              'setPrototypeOf']}
+                                              'setPrototypeOf']},
+      {title: 'native Array', entita: Array, traps: ['apply', 'get', 'construct', 'defineProperty', 'deleteProperty',
+                                                    'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
+                                                    'isExtensible', 'ownKeys', 'preventExtensions', 'set',
+                                                    'setPrototypeOf']},
+      {title: 'native String', entita: String, traps: ['apply', 'get', 'construct', 'defineProperty', 'deleteProperty',
+                                                      'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
+                                                      'isExtensible', 'ownKeys', 'preventExtensions', 'set',
+                                                      'setPrototypeOf']},
+      {title: 'native Object', entita: Object, traps: ['apply', 'get', 'construct', 'defineProperty', 'deleteProperty',
+                                                      'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
+                                                      'isExtensible', 'ownKeys', 'preventExtensions', 'set',
+                                                      'setPrototypeOf']},
+      {title: 'native Number', entita: Number, traps: ['apply', 'get', 'construct', 'defineProperty', 'deleteProperty',
+                                                      'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
+                                                      'isExtensible', 'ownKeys', 'preventExtensions', 'set',
+                                                      'setPrototypeOf']}                               
     ];
     
     
     for(let type_target of list_target){
-      describe.only(`inserimento callbacks is ${type_target.title} with ${test.title}`, ()=>{
+      describe(`inserimento callbacks is ${type_target.title} with ${test.title}`, ()=>{
         const testTrap = new testTrapGenerator(type_target.entita, test.flag);
 
-        for(let trap of   type_target.traps)
+        for(let trap of type_target.traps)
         {
            testTrap[trap]();                             
         }
