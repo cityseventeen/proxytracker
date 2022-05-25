@@ -133,16 +133,13 @@ describe('inserimento delle callback', () => {
       }
       return handler;
     };
-    const doesSureReturnedIsProxy = function(value, entita){
-      assert(util.types.isProxy(value), 'error in test. The value returned must be a proxy');
-    };
     this.apply = function(){
       it('handler = {apply: callback} inserisce la callback in apply', () => {
         const handler = {apply: cbs.cb1};
         let track = new ProxyTracker(entita, handler, forceToReturnProxy('apply'));
         let value = track();
         expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
-        if(value_returned_is_proxy) doesSureReturnedIsProxy(value, entita);
+        
       });
     };
     this.construct = function(){
@@ -151,7 +148,7 @@ describe('inserimento delle callback', () => {
         let track = new ProxyTracker(entita, handler, forceToReturnProxy('construct'));
         let value = new track(5);
         expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
-        if(value_returned_is_proxy) doesSureReturnedIsProxy(value, entita);
+        
       });
     };
     this.defineProperty = function(){
@@ -166,7 +163,7 @@ describe('inserimento delle callback', () => {
         let track = new ProxyTracker(entita, handler, forceToReturnProxy('defineProperty'));
         let value = Object.defineProperty(track, 'new_prop', {value: 8});
         expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
-        if(value_returned_is_proxy) doesSureReturnedIsProxy(value, entita);
+        
       });
     };
     this.deleteProperty = function(){
@@ -190,7 +187,7 @@ describe('inserimento delle callback', () => {
         track.parametro;
         expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
         let value = track.oggetto;
-        if(value_returned_is_proxy) doesSureReturnedIsProxy(value, entita);
+        
       });
     };
     this.getOwnPropertyDescriptor = function(){
@@ -199,7 +196,7 @@ describe('inserimento delle callback', () => {
         let track = new ProxyTracker(entita, handler, forceToReturnProxy('getOwnPropertyDescriptor'));
         let value = Object.getOwnPropertyDescriptor(track, 'oggetto');
         expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
-        if(value_returned_is_proxy) doesSureReturnedIsProxy(value, entita);
+        
       });
     };
     this.getPrototypeOf = function(){
@@ -208,7 +205,7 @@ describe('inserimento delle callback', () => {
         let track = new ProxyTracker(entita, handler, forceToReturnProxy('getPrototypeOf'));
         let value = Object.getPrototypeOf(track);
         expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
-        if(value_returned_is_proxy) doesSureReturnedIsProxy(value, entita);
+        
       });
       it('handler = {getPrototypeOf: callback} inserisce la callback in getPrototypeOf', () => {
         const handler = {getPrototypeOf: cbs.cb1};
@@ -245,14 +242,14 @@ describe('inserimento delle callback', () => {
         let track = new ProxyTracker(entita, handler, forceToReturnProxy('ownKeys'));
         let value = Object.keys(track);
         expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
-        if(value_returned_is_proxy) doesSureReturnedIsProxy(value, entita);
+        
       });
       it('handler = {ownKeys: callback} inserisce la callback in ownKeys', () => {
         const handler = {ownKeys: cbs.cb1};
         let track = new ProxyTracker(entita, handler, forceToReturnProxy('ownKeys'));
         let value = Object.getOwnPropertyNames(track);
         expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
-        if(value_returned_is_proxy) doesSureReturnedIsProxy(value, entita);
+        
       });
     };
     this.preventExtensions = function(){
@@ -261,21 +258,21 @@ describe('inserimento delle callback', () => {
         let track = new ProxyTracker(entita, handler, forceToReturnProxy('preventExtensions'));
         let value = Object.seal(track);
         expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
-        if(value_returned_is_proxy) doesSureReturnedIsProxy(value, entita);
+        
       });
       it('handler = {preventExtensions: callback} inserisce la callback in preventExtensions', () => {
         const handler = {preventExtensions: cbs.cb1};
         let track = new ProxyTracker(entita, handler, forceToReturnProxy('preventExtensions'));
         let value = Object.freeze(track);
         expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
-        if(value_returned_is_proxy) doesSureReturnedIsProxy(value, entita);
+        
       });
       it('handler = {preventExtensions: callback} inserisce la callback in preventExtensions', () => {
         const handler = {preventExtensions: cbs.cb1};
         let track = new ProxyTracker(entita, handler, forceToReturnProxy('preventExtensions'));
         let value = Object.preventExtensions(track);
         expect(bridge).to.be.an('array').that.include(`callback cb1 chiamata`);
-        if(value_returned_is_proxy) doesSureReturnedIsProxy(value, entita);
+        
       });
     };
     this.set = function(){
