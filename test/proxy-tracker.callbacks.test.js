@@ -10,6 +10,8 @@ const t = {list_all_traps: ['apply', 'get', 'construct', 'defineProperty', 'dele
                   'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
                   'isExtensible', 'ownKeys', 'preventExtensions', 'set',
                   'setPrototypeOf']};
+const lista_all_traps_except = function(...list){return t.list_all_traps.filter(elem =>list.indexOf(elem)===-1);};
+t.lista_all_traps_except = lista_all_traps_except;
 Object.freeze(t);
 
 describe('inserimento delle callback', () => {
@@ -97,42 +99,15 @@ describe('inserimento delle callback', () => {
     const object = {param: 5, metodo(){return 8;}, oggetto: {}};
     
     const list_target = [
-      {title: 'class', entita: classe, traps: ['construct', 'get', 'defineProperty', 'deleteProperty',
-                                                'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
-                                                'isExtensible', 'ownKeys', 'preventExtensions', 'set',
-                                                'setPrototypeOf']},
-      {title: 'class derivata', entita: classe_derivata, traps: ['construct', 'get', 'defineProperty', 'deleteProperty',
-                                                                'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
-                                                                'isExtensible', 'ownKeys', 'preventExtensions', 'set',
-                                                                'setPrototypeOf']},
-      {title: 'oggetto', entita: object, traps: ['get', 'defineProperty', 'deleteProperty',
-                                                  'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
-                                                  'isExtensible', 'ownKeys', 'preventExtensions', 'set',
-                                                  'setPrototypeOf']},
-      {title: 'funzione', entita: function(){}, traps: ['construct', 'apply', 'get', 'defineProperty', 'deleteProperty',
-                                                  'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
-                                                  'isExtensible', 'ownKeys', 'preventExtensions', 'set',
-                                                  'setPrototypeOf']},
-      {title: 'array []', entita: [], traps: ['get', 'defineProperty', 'deleteProperty',
-                                              'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
-                                              'isExtensible', 'ownKeys', 'preventExtensions', 'set',
-                                              'setPrototypeOf']},
-      {title: 'native Array', entita: Array, traps: ['apply', 'get', 'construct', 'defineProperty', 'deleteProperty',
-                                                    'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
-                                                    'isExtensible', 'ownKeys', 'preventExtensions', 'set',
-                                                    'setPrototypeOf']},
-      {title: 'native String', entita: String, traps: ['apply', 'get', 'construct', 'defineProperty', 'deleteProperty',
-                                                      'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
-                                                      'isExtensible', 'ownKeys', 'preventExtensions', 'set',
-                                                      'setPrototypeOf']},
-      {title: 'native Object', entita: Object, traps: ['apply', 'get', 'construct', 'defineProperty', 'deleteProperty',
-                                                      'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
-                                                      'isExtensible', 'ownKeys', 'preventExtensions', 'set',
-                                                      'setPrototypeOf']},
-      {title: 'native Number', entita: Number, traps: ['apply', 'get', 'construct', 'defineProperty', 'deleteProperty',
-                                                      'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
-                                                      'isExtensible', 'ownKeys', 'preventExtensions', 'set',
-                                                      'setPrototypeOf']}                               
+      {title: 'class', entita: classe, traps: t.lista_all_traps_except('apply')},
+      {title: 'class derivata', entita: classe_derivata, traps: t.lista_all_traps_except('apply')},
+      {title: 'oggetto', entita: object, traps: t.lista_all_traps_except('apply', 'construct')},
+      {title: 'funzione', entita: function(){}, traps: t.lista_all_traps_except()},
+      {title: 'array []', entita: [], traps: t.lista_all_traps_except('apply', 'construct')},
+      {title: 'native Array', entita: Array, traps: t.lista_all_traps_except()},
+      {title: 'native String', entita: String, traps: t.lista_all_traps_except()},
+      {title: 'native Object', entita: Object, traps: t.lista_all_traps_except()},
+      {title: 'native Number', entita: Number, traps: t.lista_all_traps_except()}                               
     ];
     
     
