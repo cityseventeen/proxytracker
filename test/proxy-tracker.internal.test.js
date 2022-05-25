@@ -100,13 +100,19 @@ if(ambiente === 'dev'){
       it('handler = {} -> no error', () => {
         assert.doesNotThrow(()=>{generaHandlerForProxyTrack({});});
       });
-      for(let handler of [undefined, [], [1,2,3], ['nome']/*, null*/, true, false, 0, -8, 5, 'stringa']){
+      it('handler = undefined -> no error', () => {
+        assert.doesNotThrow(()=>{generaHandlerForProxyTrack(undefined);});
+      });
+      it('handler = nulla -> no error', () => {
+        assert.doesNotThrow(()=>{generaHandlerForProxyTrack();});
+      });
+      for(let handler of [[], [1,2,3], ['nome']/*, null*/, true, false, 0, -8, 5, 'stringa']){
         it(`handler = ${util.inspect(handler)} -> errore`, () => {
           assert.throws(()=>{generaHandlerForProxyTrack(handler);}, 'handler deve essere un oggetto');
         });
       }
       for(let handler of [{construct: 1}, {construct: 0}, {construct: -8}, {construct: true}, {construct: false},
-                          {construct: [1,2,3]}, {construct: 'stringa'}, {construct: true}, {construct: undefined}])
+                          {construct: [1,2,3]}, {construct: 'stringa'}, {construct: true}])
       {
         it(`handler = oggetto mal formato ${util.inspect(handler)}-> errore`, () => {
           assert.throws(()=>{generaHandlerForProxyTrack(handler);}, 'elemento deve essere function, object, o array');

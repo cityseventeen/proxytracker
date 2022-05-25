@@ -1,4 +1,4 @@
-/* global Promise, describe, it, __dirname, process*/
+/* global Promise, describe, it, __dirname, process, Reflect*/
 const {expect, assert} = require('chai');
 const util = require('util');
 
@@ -14,18 +14,34 @@ describe('ProxyTracker - errori argomenti errati', () => { // la maggior parte d
   beforeEach(()=>{
     classe = class{
       constructor(arg){this.argomenti = arg; this.constr = 5;}
-      met1(){this.uno = 1; return 'called'}
-      met2(arg){this.due = arg; return 'called'}
+      met1(){this.uno = 1; return 'called';}
+      met2(arg){this.due = arg; return 'called';}
     };
   });
-  it('ProxyTracker(target, nulla) -> errore ->', () => {
-    expect(()=>{new ProxyTracker(classe);}).to.throw();
+  const handler_corretto = {get: function(){}};
+  it('ProxyTracker(target, nulla) -> no errore', () => {
+    expect(()=>{new ProxyTracker(classe);}).to.not.throw();
 
   });
-  it('ProxyTracker(target, undefined) -> errore ->', () => {
-    expect(()=>{new ProxyTracker(classe);}).to.throw();
-
+  it('ProxyTracker(target, undefined) -> no errore', () => {
+    expect(()=>{new ProxyTracker(classe, undefined);}).to.not.throw();
   });
+  it('ProxyTracker(target, undefined, {}) -> no errore', () => {
+    expect(()=>{new ProxyTracker(classe, undefined, {});}).to.not.throw();
+  });
+  it('ProxyTracker(target, undefined, handler_corretto) -> no errore', () => {
+    expect(()=>{new ProxyTracker(classe, undefined, handler_corretto);}).to.not.throw();
+  });
+  it('ProxyTracker(target, handler_corretto, {}) -> no errore', () => {
+    expect(()=>{new ProxyTracker(classe, handler_corretto, undefined);}).to.not.throw();
+  });
+  it('ProxyTracker(target, {}) -> no errore ', () => {
+    expect(()=>{new ProxyTracker(classe, handler_corretto, undefined);}).to.not.throw();
+  });
+  it('ProxyTracker(target, {any_trap: undefined}), ovvero senza callback definite -> no errore ', () => {
+    expect(()=>{new ProxyTracker(classe, {construct: undefined});}).to.not.throw();
+  });
+  
   it('ProxyTracker(target, valore diverso da object) -> errore', () => {
     for(let handler_errato of [5, 0, -8, 'stringa', function Construct(){}, [1,2,3], false, true, [function Construct(){}]])
       expect(()=>{new ProxyTracker(classe, handler_errato);}).to.throw(TypeError, 'handler deve essere un oggetto');
@@ -49,9 +65,9 @@ describe('inserimento delle callback', () => {
     let classe;
     beforeEach(()=>{
       classe = class{
-        constructor(arg){this.argomenti = arg; this.constr = 5; this.obj = {}}
-        met1(){this.uno = 1; return 'called'}
-        met2(arg){this.due = arg; return 'called'}
+        constructor(arg){this.argomenti = arg; this.constr = 5; this.obj = {};}
+        met1(){this.uno = 1; return 'called';}
+        met2(arg){this.due = arg; return 'called';}
         static met3(){}
       };
     });
@@ -123,7 +139,7 @@ describe('inserimento delle callback', () => {
     }
     class derivata extends base{
       constructor(arg){super(arg); this.derivata = arg + 100;}
-      metodo_derivata(){this.metodo = 8; return 'qualcosa'}
+      metodo_derivata(){this.metodo = 8; return 'qualcosa';}
     }
     const testTrap = new testTrapGenerator(derivata);
     
@@ -172,7 +188,13 @@ describe('inserimento delle callback', () => {
     }
   });
   
-  function testTrapGenerator(entita){
+  function testTrapGenerator(entita, value_returned_is_proxy){
+    const any_trap = 'get';
+    let handler_for_forcing_returning_proxy_from_trap;
+    if(value_returned_is_proxy){
+      handler_for_forcing_returning_proxy_from_trap = {};
+      handler_for_forcing_returning_proxy_from_trap[any_trap] = function(){};
+    }
     this.apply = function(){
       it('handler = {apply: callback} inserisce la callback in apply', () => {
         const handler = {apply: cbs.cb1};

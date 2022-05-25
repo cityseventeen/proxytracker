@@ -30,10 +30,6 @@ function checkProxyTracker(target, callbacks_for_tracker){
           typeof target === 'function' ||
           Array.isArray(target), 'target deve essere object, function o array');
   assert(Array.isArray(callbacks_for_tracker), 'callbacks_for_tracker non è un array');
-  assert(!isArrayEmpty(callbacks_for_tracker), 'deve essere presente un handler');
-}
-function isArrayEmpty(array){
-  return array.length === 0;
 }
 
 
@@ -115,11 +111,12 @@ function puntatoreRiferimento(riferimento, name){
 }
 function checkArgsForGeneraHandlersTrack(...args){
   for(let arg of args){
-    if(!(typeof arg === 'object' && !Array.isArray(arg))) throw new TypeError('handler deve essere un oggetto');
+    if(!((typeof arg === 'object' && !Array.isArray(arg)) || arg === undefined)) throw new TypeError('handler deve essere un oggetto');
   }
 }
 function unisciHandlersRicorsivo(handler_track, ...elements){
   for(let element of elements){
+    if(element === undefined) continue;
     ifElementInvalidThrowError(element);
     if(typeof element === 'function'){
       pushCallback(handler_track, element);
