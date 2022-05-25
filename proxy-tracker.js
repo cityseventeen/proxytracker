@@ -1,4 +1,4 @@
-/* global Function, Reflect */
+/* global Function, Reflect, process */
 
 const assert = require('assert').strict;
 
@@ -18,7 +18,7 @@ function ProxyExtension(target, handler_for_proxy, handler_annidato){
 }
 
 function ProxyTracker(target, ...callbacks_for_tracker){
-  checkProxyTracker(target, callbacks_for_tracker)
+  checkProxyTracker(target, callbacks_for_tracker);
   const handler_tipo_tracker = generaHandlerForProxyTrack(...callbacks_for_tracker);
   const handler = generaHandlerForProxy(handler_tipo_tracker);
   
@@ -26,9 +26,9 @@ function ProxyTracker(target, ...callbacks_for_tracker){
 }
 
 function checkProxyTracker(target, callbacks_for_tracker){
-  assert( typeof target === 'object' ||
+  /*assert( typeof target === 'object' ||
           typeof target === 'function' ||
-          Array.isArray(target), 'target deve essere object, function o array');
+          Array.isArray(target), 'target deve essere object, function o array');*/ // this check will did by ProxyJS
   assert(Array.isArray(callbacks_for_tracker), 'callbacks_for_tracker non è un array');
 }
 

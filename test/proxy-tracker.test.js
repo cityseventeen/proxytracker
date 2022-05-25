@@ -49,6 +49,12 @@ describe('ProxyTracker - errori argomenti errati', () => { // la maggior parte d
   it('ProxyTracker(target, {callback anonima -> non esiste cb anonima, ma si chiama function } -> errore perché nome non appartiene a nome trappole', () => {
     expect(()=>{new ProxyTracker(classe, {function(){}});}).to.throw('La trappola non è del tipo previsto da Proxy');
   });
+  for(let target_wrong of [undefined, 0, -8, 5, true, false]){
+    it.only(`ProxyTracker(target_wrong, handler corretto) -> errore`, () => {
+      expect(()=>{new ProxyTracker(target_wrong, handler_corretto);}).to.throw('Cannot create proxy with a non-object');
+    });
+
+  }
 });
 describe('inserimento delle callback', () => {
   let bridge;
@@ -153,7 +159,6 @@ describe('inserimento delle callback', () => {
          testTrap[trap]();                             
       }
     });
-
     describe(`in oggetto with ${test.title}`, ()=>{
       const object = {param: 5, metodo(){return 8;}, oggetto: {}};
       const testTrap = new testTrapGenerator(object, test.flag);
@@ -190,7 +195,7 @@ describe('inserimento delle callback', () => {
          testTrap[trap]();                             
       }
     });
-  }
+
   function testTrapGenerator(entita, value_returned_is_proxy){
     const any_trap = 'get';
     const forceToReturnProxy = function(from_trap){
@@ -203,8 +208,6 @@ describe('inserimento delle callback', () => {
       return handler;
     };
     const doesSureReturnedIsProxy = function(value, entita){
-      console.dir(value);
-      console.dir(typeof entita);
       assert(util.types.isProxy(value), 'error in test. The value returned must be a proxy');
     };
     this.apply = function(){
@@ -368,5 +371,6 @@ describe('inserimento delle callback', () => {
     
   };
 });
+  
 
 
