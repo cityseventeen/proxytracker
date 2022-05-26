@@ -85,9 +85,9 @@ const forceToReturnProxy = function(){
 function testTrapGenerator(entita, trap_must_to_be_return_proxy){
   assert(typeof trap_must_to_be_return_proxy === 'boolean');
   const any_trap = 'get';
-
+  const title = trap_must_to_be_return_proxy?'returns proxy':'doesnt return proxy';
   this.apply = function(){
-    it('trap apply returns proxy', () => {
+    it(`trap apply ${title}`, () => {
       const handler = {apply: [forceToReturnProxy()]};
       let track = new ProxyTracker(entita, handler);
       let value = track();
@@ -96,7 +96,7 @@ function testTrapGenerator(entita, trap_must_to_be_return_proxy){
     });
   };
   this.construct = function(){
-    it('trap construct returns proxy', () => {
+    it(`trap construct ${title}`, () => {
       const handler = {construct: [forceToReturnProxy()]};
       let track = new ProxyTracker(entita, handler);
       let value = new track(5);
@@ -105,7 +105,7 @@ function testTrapGenerator(entita, trap_must_to_be_return_proxy){
     });
   };
   this.defineProperty = function(){
-    it('trap defineProperty returns proxy', () => {
+    it(`trap defineProperty ${title}`, () => {
       const handler = {defineProperty: [forceToReturnProxy()]};
       let track = new ProxyTracker(entita, handler);
       let value = Object.defineProperty(track, 'new_prop', {value: 8});
@@ -114,13 +114,13 @@ function testTrapGenerator(entita, trap_must_to_be_return_proxy){
     });
   };
   this.deleteProperty = function(){
-    it('trap deleteProperty returns proxy', () => {
+    it(`trap deleteProperty ${title}`, () => {
       const handler = {deleteProperty: [forceToReturnProxy()]};
       let track = new ProxyTracker(entita, handler);
       let value = Reflect.deleteProperty(track, 'prop');
       expect(util.types.isProxy(value) === trap_must_to_be_return_proxy).to.be.true;
     });
-    it('trap deleteProperty returns proxy', () => {
+    it(`trap deleteProperty ${title}`, () => {
       const handler = {deleteProperty: [forceToReturnProxy()]};
       let track = new ProxyTracker(entita, handler);
       let value = delete track.parametro;
@@ -128,7 +128,7 @@ function testTrapGenerator(entita, trap_must_to_be_return_proxy){
     });
   };
   this.get = function(){
-    it('trap get returns proxy', () => {
+    it(`trap get ${title}`, () => {
       const handler = {get: [forceToReturnProxy()]};
       let track = new ProxyTracker(entita, handler);
       let value = track.oggetto;
@@ -138,7 +138,7 @@ function testTrapGenerator(entita, trap_must_to_be_return_proxy){
     });
   };
   this.getOwnPropertyDescriptor = function(){
-    it('trap getOwnPropertyDescriptor returns proxy', () => {
+    it(`trap getOwnPropertyDescriptor ${title}`, () => {
       const handler = {getOwnPropertyDescriptor: [forceToReturnProxy()]};
       let track = new ProxyTracker(entita, handler);
       let value = Object.getOwnPropertyDescriptor(track, 'oggetto');
@@ -146,7 +146,7 @@ function testTrapGenerator(entita, trap_must_to_be_return_proxy){
     });
   };
   this.getPrototypeOf = function(){
-    it('trap getPrototypeOf returns proxy', () => {
+    it(`trap getPrototypeOf ${title}`, () => {
       const handler = {getPrototypeOf: [forceToReturnProxy()]};
       let track = new ProxyTracker(entita, handler);
       let value = Object.getPrototypeOf(track);
@@ -155,13 +155,13 @@ function testTrapGenerator(entita, trap_must_to_be_return_proxy){
     });
   };
   this.has = function(){
-    it('trap has returns proxy', () => {
+    it(`trap has ${title}`, () => {
       const handler = {has: [forceToReturnProxy()]};
       let track = new ProxyTracker(entita, handler);
       let value = 'param' in track;
       expect(util.types.isProxy(value) === trap_must_to_be_return_proxy).to.be.true;
     });
-    it('trap has returns proxy', () => {
+    it(`trap has ${title}`, () => {
       const handler = {has: [forceToReturnProxy()]};
       let track = new ProxyTracker(entita, handler);
       let value = Reflect.has(track, 'param');
@@ -169,7 +169,7 @@ function testTrapGenerator(entita, trap_must_to_be_return_proxy){
     });
   };
   this.isExtensible = function(){
-    it('trap isExtensible returns proxy', () => {
+    it(`trap isExtensible ${title}`, () => {
       const handler = {isExtensible: [forceToReturnProxy()]};
       let track = new ProxyTracker(entita, handler);
       let value = Object.isExtensible(track);
@@ -177,13 +177,13 @@ function testTrapGenerator(entita, trap_must_to_be_return_proxy){
     });
   };
   this.ownKeys = function(){
-    it('trap ownKeys returns proxy', () => {
+    it(`trap ownKeys ${title}`, () => {
       const handler = {ownKeys: [forceToReturnProxy()]};
       let track = new ProxyTracker(entita, handler);
       let value = Object.keys(track);
       expect(util.types.isProxy(value) === trap_must_to_be_return_proxy).to.be.true;
     });
-    it('trap ownKeys returns proxy', () => {
+    it(`trap ownKeys ${title}`, () => {
       const handler = {ownKeys: [forceToReturnProxy()]};
       let track = new ProxyTracker(entita, handler);
       let value = Object.getOwnPropertyNames(track);
@@ -191,20 +191,20 @@ function testTrapGenerator(entita, trap_must_to_be_return_proxy){
     });
   };
   this.preventExtensions = function(){
-    it('trap preventExtensions returns proxy', () => {
+    it(`trap preventExtensions ${title}`, () => {
       const handler = {preventExtensions: [forceToReturnProxy()]};
       let track = new ProxyTracker(entita, handler);
       let value = Object.seal(track);
       expect(util.types.isProxy(value) === trap_must_to_be_return_proxy).to.be.true;
 
     });
-    it('trap preventExtensions returns proxy', () => {
+    it(`trap preventExtensions ${title}`, () => {
       const handler = {preventExtensions: [forceToReturnProxy()]};
       let track = new ProxyTracker(entita, handler);
       let value = Object.freeze(track);
       expect(util.types.isProxy(value) === trap_must_to_be_return_proxy).to.be.true;
     });
-    it('trap preventExtensions returns proxy', () => {
+    it(`trap preventExtensions ${title}`, () => {
       const handler = {preventExtensions: [forceToReturnProxy()]};
       let track = new ProxyTracker(entita, handler);
       let value = Object.preventExtensions(track);
@@ -212,7 +212,7 @@ function testTrapGenerator(entita, trap_must_to_be_return_proxy){
     });
   };
   this.set = function(){
-    it('trap set returns proxy', () => {
+    it(`trap set ${title}`, () => {
       const handler = {set: [forceToReturnProxy()]};
       let track = new ProxyTracker(entita, handler);
       let value = Reflect.set(track, 'parametro', 8);
@@ -220,7 +220,7 @@ function testTrapGenerator(entita, trap_must_to_be_return_proxy){
     });
   };
   this.setPrototypeOf = function(){
-    it('trap setPrototypeOf returns proxy', () => {
+    it(`trap setPrototypeOf ${title}`, () => {
       const handler = {setPrototypeOf: [forceToReturnProxy()]};
       let track = new ProxyTracker(entita, handler);
       let value = Reflect.setPrototypeOf(track, {});
