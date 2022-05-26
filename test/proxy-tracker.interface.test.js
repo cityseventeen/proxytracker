@@ -55,7 +55,7 @@ describe('ProxyTracker - Interfaccia argomenti errati o giusti', () => {
     });
   }
   for(let target_corretto of [{}, [], class classe{}, String, Number, Object, Array]){
-    it.only(`ProxyTracker(target_corretto = ${util.inspect(target_corretto)}, handler corretto)`, () => {
+    it(`ProxyTracker(target_corretto = ${util.inspect(target_corretto)}, handler corretto)`, () => {
       expect(()=>{new ProxyTracker(target_corretto, handler_corretto);}).to.not.throw();
     });
   }
