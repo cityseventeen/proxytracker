@@ -35,6 +35,7 @@ function checkProxyTracker(target, callbacks_for_tracker){
 
 
 function generaHandlerForProxy(handler_of_track_type){
+  assert(typeof handler_of_track_type === 'object', 'handler non è stato inserito');
   const handler_generato = creaHandlerRicorsivo(handler_of_track_type);
   return handler_generato;
 }
@@ -134,6 +135,7 @@ function unisciHandlersRicorsivo(handler_track, ...elements){
     else{
       if(Array.isArray(element)) unisciHandlersRicorsivo(handler_track, ...element);
       else{
+        insertSubHandler(handler_track);
         for(let name in element){
           insertSubHandler(handler_track, name);
           unisciHandlersRicorsivo(puntatoreRiferimento(handler_track, name), element[name]);
@@ -148,7 +150,7 @@ function pushCallback(handler, func){
 }
 function insertSubHandler(riferimento, name){
   if(riferimento.hds === undefined) riferimento.hds = {};
-  if(!(name in riferimento.hds)) riferimento.hds[name] = creaRiferimento();
+  if(name !== undefined && !(name in riferimento.hds)) riferimento.hds[name] = creaRiferimento();
 }
 
 function ifElementInvalidThrowError(element){

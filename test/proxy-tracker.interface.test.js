@@ -19,12 +19,12 @@ describe('ProxyTracker - Interfaccia argomenti errati o giusti', () => {
     };
   });
   const handler_corretto = {get: function(){}};
-  it('ProxyTracker(target, nulla) -> no errore', () => {
-    expect(()=>{new ProxyTracker(classe);}).to.not.throw();
+  it('ProxyTracker(target, nulla) -> errore', () => {
+    expect(()=>{new ProxyTracker(classe);}).to.throw('handler non è stato inserito');
 
   });
-  it('ProxyTracker(target, undefined) -> no errore', () => {
-    expect(()=>{new ProxyTracker(classe, undefined);}).to.not.throw();
+  it('ProxyTracker(target, undefined) -> errore', () => {
+    expect(()=>{new ProxyTracker(classe, undefined);}).to.throw('handler non è stato inserito');
   });
   it('ProxyTracker(target, undefined, {}) -> no errore', () => {
     expect(()=>{new ProxyTracker(classe, undefined, {});}).to.not.throw();

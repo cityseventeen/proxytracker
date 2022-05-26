@@ -14,7 +14,6 @@ if(ambiente === 'dev'){
   describe('test funzioni interne', () => {
     describe('generaHandler - diverse prove', () => {
       it('handler_track vuoto, {} -> return {}', () => {
-        assert.deepEqual(generaHandlerForProxy(undefined), {});
         assert.deepEqual(generaHandlerForProxy({}), {});
       });
       it('handler_track con parametro non incluso nelle trappole di Proxy -> errore', () => {
@@ -118,6 +117,32 @@ if(ambiente === 'dev'){
           assert.throws(()=>{generaHandlerForProxyTrack(handler);}, 'elemento deve essere function, object, o array');
         });
       }
+      it('handler = nulla -> return expected', () => {
+        const handler_track = generaHandlerForProxyTrack();
+        const expected = undefined;
+        assert.deepEqual(handler_track, expected);
+      });
+      it('handler = undefined -> return expected', () => {
+        const handler = undefined;
+        const handler_track = generaHandlerForProxyTrack(handler);
+        const expected = undefined;
+        assert.deepEqual(handler_track, expected);
+      });
+      it('handler = {} -> return expected', () => {
+        const handler = {};
+        const handler_track = generaHandlerForProxyTrack(handler);
+        const expected = {};
+        assert.deepEqual(handler_track, expected);
+      });
+      it('handler = {trap es get: {}} -> return expected', () => {
+        const handler = {get: {}};
+        const handler_track = generaHandlerForProxyTrack(handler);
+        const expected = {}; expected['get'] = {cbs: [], hds: {}};
+        console.dir(expected);
+        console.dir(handler_track);
+        assert.deepEqual(handler_track, expected);
+      }); 
+      
       it('handler = {callback con NOME} -> return expected', () => {
         const handler = {cb1};
         const handler_track = generaHandlerForProxyTrack(handler);
