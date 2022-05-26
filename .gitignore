@@ -3,3 +3,6 @@ nbproject
 
 # Dipendenze progetto e file lock
 node_modules/
+
+# log
+log/

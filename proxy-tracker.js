@@ -1,5 +1,6 @@
 /* global Function, Reflect, process */
 
+const logger = require('./lib/logger.js');
 const assert = require('assert').strict;
 
 const err = require('./lib/errorC.js');
@@ -81,9 +82,18 @@ function returnEndingTrapFromList(metodo, handler){
 
   function returnProxyOrValue(value, handler){
     if((value instanceof Function || typeof value === 'object') && typeof handler === 'object')
-      return new Proxy(value, handler);
+      try{
+        return new Proxy(value, handler);}
+      catch(e){
+        logger.error({exception: e, value, handler});
+        ifExceptionIsntForValueThenThrow(e);
+        return value;
+      }
     else return value;
   }
+}
+function ifExceptionIsntForValueThenThrow(e){
+  if(e.message === 'Cannot create proxy with a non-object') throw e;
 }
 function template_trap(callbacks, returning){
   return (...args)=>{

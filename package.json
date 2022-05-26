@@ -7,8 +7,8 @@
     "test": "test"
   },
   "scripts": {
-    "test": "NODE_ENV=dev node ./node_modules/mocha/bin/mocha",
-    "test windows": "SET NODE_ENV=dev& node ./node_modules/mocha/bin/mocha",
+    "test": "NODE_ENV=dev node PROXY_TRACKER_log=true ./node_modules/mocha/bin/mocha",
+    "test windows": "SET NODE_ENV=dev&& SET PROXY_TRACKER_log=true&& node ./node_modules/mocha/bin/mocha",
     "debug test": "npm test inspect"
   },
   "repository": {
@@ -27,11 +27,12 @@
     "url": "https://github.com/CitySeventeen/ProxyTracker/issues"
   },
   "homepage": "https://github.com/CitySeventeen/ProxyTracker#readme",
-  "dependencies": {
-    "winston": "^3.7.2"
-  },
   "devDependencies": {
     "chai": "^4.3.6",
     "mocha": "^10.0.0"
+  },
+  "dependencies": {
+    "winston": "^3.7.2",
+    "winston-daily-rotate-file": "^4.6.1"
   }
 }
