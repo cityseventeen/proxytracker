@@ -1,13 +1,13 @@
 {
   "name": "proxy-tracker",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Nato per separare in modo semplice il controllo degli errori e il logging dalla logica dell'applicazione. Facilita l'uso di Proxy con handler complessi scrivendoli in una forma standardizzata. Permette di inserire funzioni \"spia\" tramite Proxy",
   "main": "proxy-tracker.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "NODE_ENV=dev node PROXY_TRACKER_log=true ./node_modules/mocha/bin/mocha",
+    "test": "NODE_ENV=dev PROXY_TRACKER_log=true node ./node_modules/mocha/bin/mocha",
     "test windows": "SET NODE_ENV=dev&& SET PROXY_TRACKER_log=true&& node ./node_modules/mocha/bin/mocha",
     "debug test": "npm test inspect"
   },
