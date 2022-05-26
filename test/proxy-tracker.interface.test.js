@@ -4,7 +4,8 @@ const util = require('util');
 
 const ambiente = process.env.NODE_ENV;
 
-const {ProxyExtension, ProxyTracker} = require(`../proxy-tracker.js`);
+const {ProxyTracker} = require(`../proxy-tracker.js`);
+const {createDerivedFromProxy} = require('./test.support.js');
 
 const t = {};
 Object.freeze(t);
@@ -59,4 +60,8 @@ describe('ProxyTracker - Interfaccia argomenti errati o giusti', () => {
       expect(()=>{new ProxyTracker(target_corretto, handler_corretto);}).to.not.throw();
     });
   }
+  it('extend della derivata non restituisce errore', () => {
+    expect(()=>{createDerivedFromProxy([], ProxyTracker);}).to.not.throw();
+  });
 });
+
