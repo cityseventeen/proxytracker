@@ -15,8 +15,17 @@ t.lista_all_traps_except = lista_all_traps_except;
 Object.freeze(t);
 
 
-
-describe.only('traps return Proxy if proxable (function or object and doesnt throw error es for non writeble element', () => {
+describe('handler = {trap: {}} fa restituire proxy dei valori ritornati', () => {
+  it('es con get', () => {
+    const obj = {param: {a: 5}};
+    const handler = {get: {}};
+    const proxy = new ProxyTracker(obj, handler);
+    let value = proxy.param;
+    expect(util.types.isProxy(value)).to.be.true;
+    
+  });
+});
+describe('traps return Proxy if proxable (function or object and doesnt throw error es for non writeble element', () => {
   class classe{
         static funzione(){}
         static oggetto = {}
@@ -26,36 +35,36 @@ describe.only('traps return Proxy if proxable (function or object and doesnt thr
     constructor(arg){this.base = arg;}
   }
   class classe_derivata extends base{
-    constructor(arg){super(arg); this.derivata = arg + 100;}
-    metodo_derivata(){this.metodo = 8; return 'qualcosa';}
     static oggetto = {}
+    static funzione(){}
   }
-  const object = {param: 5, metodo(){return 8;}, oggetto: {}};
+  const object = {oggetto: {}, funzione(){}};
+  const funzione = function(){return {};};
+  addPropertyForTrapGetTest(funzione);
+  const array = [];
+  addPropertyForTrapGetTest(array);
+  const Native_Array = Array;
+  const Native_String = String;
+  const Native_Object = Object;
+  const Native_Number = Number;
+  const Native_Function = Function;
 
+  
+  
   const list_target = [
-    {title: 'class', entita: classe, traps: t.lista_all_traps_except('apply'), proxy: t.lista_all_traps_except('defineProperty', 'deleteProperty', 'has', 'isExtensible', 'set')}/*,
-    {title: 'class derivata', entita: classe_derivata, traps: t.lista_all_traps_except('apply'), proxy: t.lista_all_traps_except()},
-    {title: 'oggetto', entita: object, traps: t.lista_all_traps_except('apply', 'construct'), proxy: t.lista_all_traps_except()},
-    {title: 'funzione', entita: function(){return {}}, traps: t.lista_all_traps_except(), proxy: t.lista_all_traps_except()},
-    {title: 'array []', entita: [], traps: t.lista_all_traps_except('apply', 'construct'), proxy: t.lista_all_traps_except()},
-    {title: 'native Array', entita: Array, traps: t.lista_all_traps_except(), proxy: t.lista_all_traps_except()},
-    {title: 'native String', entita: String, traps: t.lista_all_traps_except(), proxy: t.lista_all_traps_except()},
-    {title: 'native Object', entita: Object, traps: t.lista_all_traps_except(), proxy: t.lista_all_traps_except()},
-    {title: 'native Number', entita: Number, traps: t.lista_all_traps_except(), proxy: t.lista_all_traps_except()},
-    {title: 'native Function', entita: Function, traps: t.lista_all_traps_except(), proxy: t.lista_all_traps_except()}*/
+    {title: 'class', entita: classe, traps: t.lista_all_traps_except('apply'), proxy: t.lista_all_traps_except(                  'deleteProperty', 'has', 'isExtensible', 'set', 'getOwnPropertyDescriptor', 'getPrototypeOf', 'ownKeys', 'setPrototypeOf')},
+    {title: 'class derivata', entita: classe_derivata, traps: t.lista_all_traps_except('apply'), proxy: t.lista_all_traps_except('deleteProperty', 'has', 'isExtensible', 'set', 'getOwnPropertyDescriptor',                   'ownKeys', 'setPrototypeOf')},
+    {title: 'oggetto', entita: object, traps: t.lista_all_traps_except('apply', 'construct'), proxy: t.lista_all_traps_except(   'deleteProperty', 'has', 'isExtensible', 'set', 'getOwnPropertyDescriptor',                   'ownKeys', 'setPrototypeOf')},
+    {title: 'funzione', entita: funzione, traps: t.lista_all_traps_except(), proxy: t.lista_all_traps_except(                    'deleteProperty', 'has', 'isExtensible', 'set', 'getOwnPropertyDescriptor', 'getPrototypeOf', 'ownKeys', 'setPrototypeOf')},
+    {title: 'array []', entita: array, traps: t.lista_all_traps_except('apply', 'construct'), proxy: t.lista_all_traps_except(   'deleteProperty', 'has', 'isExtensible', 'set', 'getOwnPropertyDescriptor',                   'ownKeys', 'setPrototypeOf')},
+    {title: 'native Array', entita: Native_Array, traps: t.lista_all_traps_except('get'), proxy: t.lista_all_traps_except(       'deleteProperty', 'has', 'isExtensible', 'set', 'getOwnPropertyDescriptor', 'getPrototypeOf', 'ownKeys', 'setPrototypeOf')},
+    {title: 'native String', entita: Native_String, traps: t.lista_all_traps_except('get'), proxy: t.lista_all_traps_except(     'deleteProperty', 'has', 'isExtensible', 'set', 'getOwnPropertyDescriptor', 'getPrototypeOf', 'ownKeys', 'setPrototypeOf', 'apply')},
+    {title: 'native Object', entita: Native_Object, traps: t.lista_all_traps_except('get'), proxy: t.lista_all_traps_except(     'deleteProperty', 'has', 'isExtensible', 'set', 'getOwnPropertyDescriptor', 'getPrototypeOf', 'ownKeys', 'setPrototypeOf')},
+    {title: 'native Number', entita: Native_Number, traps: t.lista_all_traps_except('get'), proxy: t.lista_all_traps_except(     'deleteProperty', 'has', 'isExtensible', 'set', 'getOwnPropertyDescriptor', 'getPrototypeOf', 'ownKeys', 'setPrototypeOf', 'apply')},
+    {title: 'native Function', entita: Native_Function, traps: t.lista_all_traps_except('get'), proxy: t.lista_all_traps_except( 'deleteProperty', 'has', 'isExtensible', 'set', 'getOwnPropertyDescriptor', 'getPrototypeOf', 'ownKeys', 'setPrototypeOf')}
   ];
   
-  for(let type_target of list_target){
-    describe(`for ${type_target.title} traps returning proxy test`, ()=>{
-      const does_trap_return_proxy = true;
-      const testTrap = new testTrapGenerator(type_target.entita, does_trap_return_proxy);
-                            
-      for(let trap of returns_traps_to_test(type_target.traps, type_target.proxy, does_trap_return_proxy))
-      {
-         testTrap[trap]();                             
-      }
-    });
-  }
+  testReturnProxy(list_target);
 
 });
 describe('traps doesnt return proxy if the value returnet isnt function or object', () => {
@@ -64,6 +73,25 @@ describe('traps doesnt return proxy if the value returnet isnt function or objec
 describe('traps doesnt return proxy if isnt proxable(es for non writable element)', () => {
 
 });
+
+function addPropertyForTrapGetTest(entita){
+  entita.oggetto = {};
+  entita.funzione = function(){};
+}
+
+function testReturnProxy(list_target){
+  for(let type_target of list_target){
+    describe(`for ${type_target.title} traps returning proxy test`, ()=>{
+      for(let does_trap_return_proxy of [true, false]){
+          const testTrap = new testTrapGenerator(type_target.entita, does_trap_return_proxy);
+          for(let trap of returns_traps_to_test(type_target.traps, type_target.proxy, does_trap_return_proxy))
+          {
+             testTrap[trap]();                             
+          }
+      }
+    });
+  }
+}
 function returns_traps_to_test(traps_list, traps_that_returns_proxy, does_trap_return_proxy){
   assert(typeof does_trap_return_proxy === 'boolean');
   if(does_trap_return_proxy){
@@ -76,6 +104,7 @@ function returns_traps_to_test(traps_list, traps_that_returns_proxy, does_trap_r
 
 
 const forceToReturnProxy = function(){
+  return {};
   const any_trap = 'get';
   const handler_for_forcing_returning_proxy_from_trap = {};
   handler_for_forcing_returning_proxy_from_trap[any_trap] = function(){};
@@ -128,12 +157,16 @@ function testTrapGenerator(entita, trap_must_to_be_return_proxy){
     });
   };
   this.get = function(){
-    it(`trap get ${title}`, () => {
+    it(`trap get object ${title}`, () => {
       const handler = {get: [forceToReturnProxy()]};
       let track = new ProxyTracker(entita, handler);
       let value = track.oggetto;
       expect(util.types.isProxy(value) === trap_must_to_be_return_proxy).to.be.true;
-      value = track.funzione;
+    });
+    it(`trap get funzione ${title}`, () => {
+      const handler = {get: [forceToReturnProxy()]};
+      let track = new ProxyTracker(entita, handler);
+      let value = track.funzione;
       expect(util.types.isProxy(value) === trap_must_to_be_return_proxy).to.be.true;
     });
   };
@@ -151,7 +184,6 @@ function testTrapGenerator(entita, trap_must_to_be_return_proxy){
       let track = new ProxyTracker(entita, handler);
       let value = Object.getPrototypeOf(track);
       expect(util.types.isProxy(value) === trap_must_to_be_return_proxy).to.be.true;
-
     });
   };
   this.has = function(){
