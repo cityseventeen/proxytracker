@@ -8,8 +8,8 @@
   },
   "scripts": {
     "test": "NODE_ENV=dev PROXY_TRACKER_log=true node ./node_modules/mocha/bin/mocha",
-    "test windows": "SET NODE_ENV=dev&& SET PROXY_TRACKER_log=true&& node ./node_modules/mocha/bin/mocha",
-    "debug test": "npm test inspect"
+    "test_windows": "SET NODE_ENV=dev&& SET PROXY_TRACKER_log=true&& node ./node_modules/mocha/bin/mocha",
+    "debug test": "npm run test_windows inspect"
   },
   "repository": {
     "type": "git",
