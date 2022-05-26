@@ -4,7 +4,7 @@ const util = require('util');
 
 const ambiente = process.env.NODE_ENV;
 
-const {ProxyExtension, ProxyTracker} = require(`../proxy-tracker.js`);
+const {ProxyTracker} = require(`../proxy-tracker.js`);
 
 const t = {list_all_traps: ['apply', 'get', 'construct', 'defineProperty', 'deleteProperty',
                   'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
