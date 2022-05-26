@@ -26,10 +26,14 @@ describe('handler = {trap: {}} fa restituire proxy dei valori ritornati', () => 
   });
 });
 describe('traps return Proxy if proxable (function or object and doesnt throw error es for non writeble element', () => {
+  function addPropertyForTrapGetTest(entita){
+    entita.oggetto = {};
+    entita.funzione = function(){};
+  }
   class classe{
-        static funzione(){}
-        static oggetto = {}
-      }
+    static funzione(){}
+    static oggetto = {}
+  }
 
   class base{
     constructor(arg){this.base = arg;}
@@ -67,17 +71,52 @@ describe('traps return Proxy if proxable (function or object and doesnt throw er
   testReturnProxy(list_target);
 
 });
-describe('traps doesnt return proxy if the value returnet isnt function or object', () => {
+describe('traps doesnt return proxy if the value returned isnt function or object', () => {
+  function addPropertyForTrapGetTest(entita){
+    entita.oggetto = 'non {} oggetto';
+    entita.funzione = 'non function(){}';
+  }
+  class classe{
+    static funzione = 'non function(){}'
+    static oggetto = 'non {} oggetto'
+  }
+
+  class base{
+    constructor(arg){this.base = arg;}
+  }
+  class classe_derivata extends base{
+    static funzione = 'non function(){}'
+    static oggetto = 'non {} oggetto'
+  }
+  const object = {oggetto: 'non {} oggetto', funzione: 'non function(){}'};
+  const funzione = function(){return {};};
+  addPropertyForTrapGetTest(funzione);
+  const array = [];
+  addPropertyForTrapGetTest(array);
+  const Native_Array = Array;
+  const Native_String = String;
+  const Native_Object = Object;
+  const Native_Number = Number;
+  const Native_Function = Function;
+
   
-});
-describe('traps doesnt return proxy if isnt proxable(es for non writable element)', () => {
+  
+  const list_target = [
+    {title: 'class', entita: classe, traps: t.lista_all_traps_except('apply'), proxy: t.lista_all_traps_except(                  'deleteProperty', 'has', 'isExtensible', 'set', 'getOwnPropertyDescriptor', 'getPrototypeOf', 'ownKeys', 'setPrototypeOf', 'get')},
+    {title: 'class derivata', entita: classe_derivata, traps: t.lista_all_traps_except('apply'), proxy: t.lista_all_traps_except('deleteProperty', 'has', 'isExtensible', 'set', 'getOwnPropertyDescriptor',                   'ownKeys', 'setPrototypeOf', 'get')},
+    {title: 'oggetto', entita: object, traps: t.lista_all_traps_except('apply', 'construct'), proxy: t.lista_all_traps_except(   'deleteProperty', 'has', 'isExtensible', 'set', 'getOwnPropertyDescriptor',                   'ownKeys', 'setPrototypeOf', 'get')},
+    {title: 'funzione', entita: funzione, traps: t.lista_all_traps_except(), proxy: t.lista_all_traps_except(                    'deleteProperty', 'has', 'isExtensible', 'set', 'getOwnPropertyDescriptor', 'getPrototypeOf', 'ownKeys', 'setPrototypeOf', 'get')},
+    {title: 'array []', entita: array, traps: t.lista_all_traps_except('apply', 'construct'), proxy: t.lista_all_traps_except(   'deleteProperty', 'has', 'isExtensible', 'set', 'getOwnPropertyDescriptor',                   'ownKeys', 'setPrototypeOf', 'get')},
+    {title: 'native Array', entita: Native_Array, traps: t.lista_all_traps_except('get'), proxy: t.lista_all_traps_except(       'deleteProperty', 'has', 'isExtensible', 'set', 'getOwnPropertyDescriptor', 'getPrototypeOf', 'ownKeys', 'setPrototypeOf')},
+    {title: 'native String', entita: Native_String, traps: t.lista_all_traps_except('get'), proxy: t.lista_all_traps_except(     'deleteProperty', 'has', 'isExtensible', 'set', 'getOwnPropertyDescriptor', 'getPrototypeOf', 'ownKeys', 'setPrototypeOf', 'apply')},
+    {title: 'native Object', entita: Native_Object, traps: t.lista_all_traps_except('get'), proxy: t.lista_all_traps_except(     'deleteProperty', 'has', 'isExtensible', 'set', 'getOwnPropertyDescriptor', 'getPrototypeOf', 'ownKeys', 'setPrototypeOf')},
+    {title: 'native Number', entita: Native_Number, traps: t.lista_all_traps_except('get'), proxy: t.lista_all_traps_except(     'deleteProperty', 'has', 'isExtensible', 'set', 'getOwnPropertyDescriptor', 'getPrototypeOf', 'ownKeys', 'setPrototypeOf', 'apply')},
+    {title: 'native Function', entita: Native_Function, traps: t.lista_all_traps_except('get'), proxy: t.lista_all_traps_except( 'deleteProperty', 'has', 'isExtensible', 'set', 'getOwnPropertyDescriptor', 'getPrototypeOf', 'ownKeys', 'setPrototypeOf')}
+  ];
+  
+  testReturnProxy(list_target);
 
 });
-
-function addPropertyForTrapGetTest(entita){
-  entita.oggetto = {};
-  entita.funzione = function(){};
-}
 
 function testReturnProxy(list_target){
   for(let type_target of list_target){
