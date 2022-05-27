@@ -2,6 +2,7 @@
 - [Purpose](#purpose)
 - [Utilization](#utilization)
 - [Proxy Remover](#proxyremover)
+- [Derived Class](#derivedclass)
 
 ## Purpose
 This repository is born to give the chance to separate application logic from error checking and logging, as PragmaticProgrammer and CleanCode practices.
@@ -86,7 +87,7 @@ instance.sum(4) // --> console.log([Function sum], thisArg, [4])
 ```
 
 ## ProxyRemover
-from 0.3.5 is possible to get the orinin entity without proxy, also if is returned by trap.
+from 0.3.5 is possible to get the origin entity without proxy, also if is returned by trap.
 
 eg of usage
 ```js
@@ -97,5 +98,10 @@ const handler = {construct: {get: {}}}
 const user_class_proxy = new ProxyTracker(user_class) // --> return a Proxy. util.types.isProxy(user_class_proxy) === true
 const instance_from_proxy = new user_class_proxy() // --> return a Proxy because there is a trap construct with next get trap
 const origin_instance = ProxyRemover(instance_from_proxy) // return instance without proxy. util.types.isProxy(origin_instance) === false
-
 ```
+
+## DerivedClass
+If you derive a proxy class, the traps has, get, set, construct are keeped.
+Only if you overwrite parameters or methods, the trap disappears.
+For the construct trap, it is keeped in the derived class.
+If you don't want traps to derived class, you must to do use ProxyRemover before deriving the class

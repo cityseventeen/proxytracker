@@ -17,7 +17,7 @@ const t = { list_all_traps_for_class: ['get', 'defineProperty', 'deleteProperty'
                   'setPrototypeOf']};
 Object.freeze(t);
 
-describe.only('derived class of proxy - activation of trap in the derived class', () => {
+describe('derived class of proxy - activation of trap in the derived class', () => {
   let bridge;
   let derived_class, base_proxy;
   
@@ -59,17 +59,37 @@ describe.only('derived class of proxy - activation of trap in the derived class'
       }
       expect(bridge).to.eql([]);
       derived_with_overwrite.overwritedMethodFromDerived();
-      expect(bridge).to.be.an('array').that.not.include(`called apply`);
-      void function doesSureMethodDoesntDefinedInBaseClass(){expect(base_proxy.overwritedMethodFromDerived).to.be.undefined;};
+      expect(bridge).to.eql([]);
+      void function doesSureMethodIsDefinedInBaseClass(){expect(base_proxy.overwritedMethodFromDerived).to.be.not.undefined;}();
   });
-  it.skip('metodi e parametri non sovrascritti in derivata, attivano la trappola di base', () => {
-    
+  it('metodi non sovrascritti in derivata, attivano la trappola di base', () => {
+      derived_class.methodBase();
+      expect(bridge).to.be.an('array').that.include(`called apply in get`);
+      void function doesSureMethodisDefinedInBaseClass(){expect(base_proxy.methodBase).to.not.be.undefined;}();
   });
-  it.skip('construct di derivata sovrascritto --> attiva o non attiva?', () => {
-    
+  it('parametri non sovrascritti in derivata, attivano la trappola di base', () => {
+      derived_class.param_base;
+      expect(bridge).to.be.an('array').that.include(`called get`);
+      void function doesSureMethodIsDefinedInBaseClass(){expect(base_proxy.param_base).to.be.not.undefined;}();
   });
-  it.skip('construct di derivata non sovrascritto -> attiva o non attiva?', () => {
-    
+  it('construct di derivata sovrascritto --> attiva comunque la trappola di base perché chiama super constructor', () => {
+      class derived_with_overwrite extends base_proxy{constructor(){super();}}
+      expect(bridge).to.eql([]);
+      new derived_with_overwrite();
+      expect(bridge).to.eql(['called construct']);
+  });
+  it('construct di derivata non sovrascritto -> attiva comunque la trappola di base perché chiama super constructor', () => {
+      class derived_with_overwrite extends base_proxy{}
+      expect(bridge).to.eql([]);
+      new derived_with_overwrite();
+      expect(bridge).to.eql(['called construct']);
+  });
+  it('get da istanza di derivata da proxy ->', () => {
+      class derived_with_overwrite extends base_proxy{constructor(){super();}}
+      expect(bridge).to.eql([]);
+      let instance = new derived_with_overwrite();
+      instance.param_instance;
+      expect(bridge).to.eql(['called construct', 'called get in constructor']);
   });
 });
 function svuotaBridge(bridge){
@@ -80,7 +100,7 @@ function svuotaBridge(bridge){
 function activesTrap(entity, trap_name){
   let value;
   switch(trap_name){
-    case 'apply': value = entity.overwritedMethodFromDerived(); break;
+    case 'apply': value = Reflect[trap_name](entity, this,[undefined]); break;
     case 'construct': value = Reflect[trap_name](entity, [undefined]); break;
     case 'defineProperty': value = Reflect[trap_name](entity, 'property', {}); break;
     case 'deleteProperty': value = Reflect[trap_name](entity, 'property'); break;
