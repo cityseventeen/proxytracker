@@ -91,6 +91,13 @@ describe('derived class of proxy - activation of trap in the derived class', () 
       instance.param_instance;
       expect(bridge).to.eql(['called construct', 'called get in constructor']);
   });
+  it.skip('', () => {
+    // serie di test se riesco a implementare possibilità di eliminare trappole get apply ecc dopo construct, solo se nella classe derivata.
+    // quindi nella classe base ci sono le trappole nella istanza (doo construct), mentre nella derivata c'è solo la trappola construct.
+    
+    // altra serie di test per verificare cosa succede con proxy della derivata del proxy. ovvero, ci sono due trapoole di construct (una della derivata, e poi quella di base)
+    //se vanno in conflitto, quale viene eseguita prima ecc. stessa cosa per get di derivata e get di base, quando si chiamano metodi solo di derivata  o di base, ecc altre trappole
+  });
 });
 function svuotaBridge(bridge){
   for(let i=0; i<bridge.length; i++){

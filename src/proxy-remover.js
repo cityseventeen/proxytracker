@@ -30,7 +30,7 @@ function ProxyRemover(entity_proxy){
 
 function checkProxyRemover(entity_proxy){
   if(!types.isProxy(entity_proxy)) throw new Error('the argument must to be a proxy');
-  if(!isProxyTracker(entity_proxy)) throw new Error('the argument must to be a proxy create by ProxyTracker');
+  if(!isProxyTracker(entity_proxy)) throw new Error('the argument must to be a proxy created by ProxyTracker');
 }
 function isProxyTracker(entity_proxy){
   return entity_proxy[symb_marking] === true;

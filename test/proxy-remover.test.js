@@ -41,7 +41,7 @@ describe('Removing of proxy', () => {
     expect(util.types.isProxy(proxy)).to.be.true;
     expect(bridge).to.be.an('array').that.include('callback called');
   });
-  it('removin proxy from entity with trap get', () => {
+  it('removing proxy from entity with trap get', () => {
     const proxy = new ProxyTracker(classe, {get: cb(bridge)});
     expect(util.types.isProxy(proxy)).to.be.true;
     
@@ -53,8 +53,9 @@ describe('Removing of proxy', () => {
     expect(util.types.isProxy(removed_proxy)).to.be.false;
     expect(bridge).to.be.an('array').that.not.include('callback called');
     expect(removed_proxy).to.equal(classe);
+    expect(proxy).to.not.equal(classe);
   });
-  it('removin proxy from entity that hasnt trap get', () => {
+  it('removing proxy from entity that hasnt trap get', () => {
     const proxy = new ProxyTracker(classe, {set: cb(bridge)});
     expect(util.types.isProxy(proxy)).to.be.true;
     
@@ -66,6 +67,7 @@ describe('Removing of proxy', () => {
     expect(util.types.isProxy(removed_proxy)).to.be.false;
     expect(bridge).to.be.an('array').that.not.include('callback called');
     expect(removed_proxy).to.equal(classe);
+    expect(proxy).to.not.equal(classe);
   });
   it('removing proxy from proxy returned by trap', () => {
     const proxy = new ProxyTracker(classe, {get: {apply: {get: cb(bridge)}}});
@@ -86,7 +88,7 @@ describe('Removing of proxy', () => {
   });
   it('remover to proxy that isnt created by ProxyTracker throws error', () => {
     const proxy_no_tracker = new Proxy(classe, {});
-    expect(()=>{ProxyRemover(proxy_no_tracker);}).to.throw('the argument must to be a proxy create by ProxyTracker');
+    expect(()=>{ProxyRemover(proxy_no_tracker);}).to.throw('the argument must to be a proxy created by ProxyTracker');
   });
 });
 
