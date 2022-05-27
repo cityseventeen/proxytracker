@@ -1,5 +1,4 @@
 const assert = require('assert').strict;
-const {ProxyRemover} = require('./proxy-remover.js');
 
 const generaHandlerForProxy = require('./handler-proxy-generator.js');
 const generaHandlerForProxyTrack = require('./handlertrack-proxy-generator.js');
@@ -20,4 +19,4 @@ function checkProxyTracker(target, callbacks_for_tracker){
   assert(Array.isArray(callbacks_for_tracker), 'callbacks_for_tracker non è un array');
 }
 
-module.exports = {ProxyTracker, ProxyRemover};
+module.exports = {ProxyTracker};
