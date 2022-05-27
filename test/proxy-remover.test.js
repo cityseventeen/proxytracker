@@ -15,7 +15,7 @@ describe('Removing of proxy', () => {
   let bridge;
   let classe;
   beforeEach(()=>{
-    classe =  class {static proxyReturn(){return {param: 'value'}}};
+    classe =  class {static proxyReturn(){return {param: 'value'};}};
     bridge = [];  
   });
   
@@ -32,7 +32,7 @@ describe('Removing of proxy', () => {
     const proxy = new ProxyTracker(classe, {});
     
     expect(util.types.isProxy(proxy)).to.be.true;
-    expect(()=>{proxy[any_parameter]}).to.not.throw();
+    expect(()=>{proxy[any_parameter];}).to.not.throw();
   });
   it('trap get without symbol const origin is called', () => {
     const any_parameter = 'prop';
@@ -81,11 +81,12 @@ describe('Removing of proxy', () => {
     expect(util.types.isProxy(removed_proxy)).to.be.false;
     expect(bridge).to.be.an('array').that.not.include('callback called');
   });
-  it.skip('remover to non proxy throws error', () => {
-    
+  it('remover to non proxy throws error', () => {
+    expect(()=>{ProxyRemover(classe);}).to.throw('the argument must to be a proxy');
   });
-  it.skip('remover to proxy that isnt created by ProxyTracker throws error', () => {
-    
+  it('remover to proxy that isnt created by ProxyTracker throws error', () => {
+    const proxy_no_tracker = new Proxy(classe, {});
+    expect(()=>{ProxyRemover(proxy_no_tracker);}).to.throw('the argument must to be a proxy create by ProxyTracker');
   });
 });
 
