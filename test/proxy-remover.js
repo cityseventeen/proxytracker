@@ -10,12 +10,12 @@ const {createDerivedFromProxy} = require('./test.support.js');
 const t = {};
 Object.freeze(t);
 
-describe.only('Removing of proxy', () => {
+describe('Removing of proxy', () => {
   const cb = function(bridge){return function(){bridge.push('callback called');};};
   let bridge;
   let classe;
   beforeEach(()=>{
-    classe =  class {};
+    classe =  class {static proxyReturn(){return {}}};
     bridge = [];  
   });
   
@@ -48,6 +48,21 @@ describe.only('Removing of proxy', () => {
     expect(bridge).to.be.an('array').that.not.include('callback called');
     expect(util.types.isProxy(removed_proxy)).to.be.false;
     expect(removed_proxy).to.equal(classe);
+  });
+  it('removing proxy from proxy returned by trap', () => {
+    const proxy = new ProxyTracker(classe, {get: {apply: {get: cb(bridge)}}});
+    expect(util.types.isProxy(proxy)).to.be.true;
+    const value_proxy_returned_by_trap = proxy.proxyReturn();
+    
+    value_proxy_returned_by_trap['any_param'];
+    expect(bridge).to.be.an('array').that.include('callback called');
+    bridge.pop();
+    
+    const removed_proxy = proxy[ORIGIN];
+    expect(bridge).to.be.an('array').that.not.include('callback called');
+    expect(util.types.isProxy(removed_proxy)).to.be.false;
+    expect(removed_proxy).to.equal(classe);
+    
     
   });
 });
