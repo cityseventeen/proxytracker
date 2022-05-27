@@ -11,10 +11,13 @@ const t = { list_all_traps_for_class: ['get', 'construct', 'defineProperty', 'de
                   'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
                   'isExtensible', 'ownKeys', 'preventExtensions', 'set',
                   'setPrototypeOf'],
-            list_all_traps_for_class_derived: ['get', 'construct', 'has', 'set']};
+            list_traps_for_derived_that_doesnt_activate_trap: ['defineProperty', 'deleteProperty',
+                  'getOwnPropertyDescriptor', 'getPrototypeOf',
+                  'isExtensible', 'ownKeys', 'preventExtensions',
+                  'setPrototypeOf']};
 Object.freeze(t);
 
-describe.skip('derived class of proxy - Each trap isnt activated in the derived class', () => {
+describe('derived class of proxy - Each trap isnt activated in the derived class', () => {
   let bridge;
   let derived_class, base_proxy;
   
@@ -26,8 +29,24 @@ describe.skip('derived class of proxy - Each trap isnt activated in the derived 
     svuotaBridge(bridge);
   });
   
-  for(let trap_name of t.list_all_traps_for_class)
+  it('extends base class with proxy return a non proxy entity', () => {
+    expect(util.types.isProxy(derived_class)).to.be.false;
+  });
+  for(let trap_name of t.list_traps_for_derived_that_doesnt_activate_trap)
     it(`${trap_name} isnt activated`, () => {
+      expect(bridge).to.eql([]);
+      activesTrap(derived_class, trap_name);
+      expect(bridge).to.be.an('array').that.not.include(`called ${trap_name}`);
+      doesSureThatBaseClassProxedActivesTrap(bridge, base_proxy, trap_name);
+    });
+  for(let trap_name of t.list_all_traps_for_class)
+    it.skip(`${trap_name} isnt activated when the method/param is overwrite in derived class`, () => { //// al momento get construct has e set sono ancor auna trappola.
+      /// per cui, se si vuole una derivata senza trappole, bisogna farla dall'entità originria e non dal proxy dell'entità
+      class derived_with_overwhrite extends base_proxy{
+        constructor(){super();}
+        static property = 'value';
+      }
+      expect(bridge).to.eql([]);
       activesTrap(derived_class, trap_name);
       expect(bridge).to.be.an('array').that.not.include(`called ${trap_name}`);
       doesSureThatBaseClassProxedActivesTrap(bridge, base_proxy, trap_name);
