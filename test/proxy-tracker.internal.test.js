@@ -13,39 +13,44 @@ if(ambiente === 'dev'){
   const {generaHandlerForProxyTrack ,generaHandlerForProxy} = require(`../proxy-tracker.js`).test;
   describe('test funzioni interne', () => {
     describe('generaHandler - diverse prove', () => {
-      it('handler_track vuoto, {} -> return {}', () => {
-        assert.deepEqual(generaHandlerForProxy({}), {});
+      it('handler_track vuoto, {} -> return objec with get trap for remover proxy function', () => {
+        expect(generaHandlerForProxy({})).to.be.an('object').that.have.all.keys('get').and.that.have.property('get').that.to.be.a('function');
       });
       it('handler_track con parametro non incluso nelle trappole di Proxy -> errore', () => {
         const handler = {nonesistenelproxy(arg){}};
         assert.throws(()=>{generaHandlerForProxy(handler);}, TypeError, 'La trappola non è del tipo previsto da Proxy');
       });
       describe('handler_track con solo un parametro ritorna un oggetto con una sola funzione', () => {
-        it('che ha solo una callback', () => {
+        it('che ha solo una callback in get', () => {
+          const callback_da_applicare = function(...arg){};
+          const handler = {get: [callback_da_applicare]};
+          expect(generaHandlerForProxy(handler)).to.be.an('object').that.have.all.keys('get').and.that.have.property('get').that.to.be.a('function');
+        });
+        it('che ha solo una callback non in get', () => {
           const callback_da_applicare = function(...arg){};
           const handler = {apply: [callback_da_applicare]};
-          expect(generaHandlerForProxy(handler)).to.be.an('object').that.have.all.keys('apply').and.that.have.property('apply').that.to.be.a('function');
+          expect(generaHandlerForProxy(handler)).to.be.an('object').that.have.all.keys('apply', 'get').and.that.have.property('apply').that.to.be.a('function');
         });
-        it('che ha due callback', () => {
+        it('che ha due callback non in get', () => {
           const callback_da_applicare = function(...arg){};
           const handler = {apply: [callback_da_applicare, callback_da_applicare]};
-          expect(generaHandlerForProxy(handler)).to.be.an('object').that.have.all.keys('apply').and.that.have.property('apply').that.to.be.a('function');
+          expect(generaHandlerForProxy(handler)).to.be.an('object').that.have.all.keys('apply', 'get').and.that.have.property('apply').that.to.be.a('function');
         });
         it('che ha una callback e un oggetto tipo handler_track', () => {
           const callback_da_applicare = function(...arg){};
           const handler_track_innestato = {apply: [callback_da_applicare]};
           const handler = {apply: [callback_da_applicare, callback_da_applicare, handler_track_innestato]};
-          expect(generaHandlerForProxy(handler)).to.be.an('object').that.have.all.keys('apply').and.that.have.property('apply').that.to.be.a('function');
+          expect(generaHandlerForProxy(handler)).to.be.an('object').that.have.all.keys('apply', 'get').and.that.have.property('apply').that.to.be.a('function');
         });
         it('senza callback con solo oggetotipo handler_track', () => {
           const callback_da_applicare = function(...arg){};
           const handler_track_innestato = {apply: [callback_da_applicare]};
           const handler = {apply: [handler_track_innestato]};
-          expect(generaHandlerForProxy(handler)).to.be.an('object').that.have.all.keys('apply').and.that.have.property('apply').that.to.be.a('function');
+          expect(generaHandlerForProxy(handler)).to.be.an('object').that.have.all.keys('apply', 'get').and.that.have.property('apply').that.to.be.a('function');
         });
         it('handler_track con trappola senza callback e senza handler', () => {
           const handler = {apply: []};
-          expect(generaHandlerForProxy(handler)).to.be.an('object').that.have.all.keys('apply').and.that.have.property('apply').that.to.be.a('function');
+          expect(generaHandlerForProxy(handler)).to.be.an('object').that.have.all.keys('apply', 'get').and.that.have.property('apply').that.to.be.a('function');
         });
       });
       describe('handler_track con più parametri -> ritorna oggetto con più funzioni', () => {
@@ -54,7 +59,7 @@ if(ambiente === 'dev'){
           const handler_track_innestato = {get: [callback_da_applicare]};
           const handler_track = {construct: [callback_da_applicare, callback_da_applicare, handler_track_innestato, callback_da_applicare],
                                  apply: [handler_track_innestato, callback_da_applicare]};
-          expect(generaHandlerForProxy(handler_track)).to.be.an('object').that.have.all.keys('apply', 'construct')
+          expect(generaHandlerForProxy(handler_track)).to.be.an('object').that.have.all.keys('apply', 'construct', 'get')
                   .and.that.have.property('construct').that.to.be.a('function');    
         });
         it('profondità handler innestati maggiore di 2', () => {
@@ -64,7 +69,7 @@ if(ambiente === 'dev'){
           const handler_track = {construct: [callback_da_applicare, callback_da_applicare, {get: [handler_track_innestato2]}, callback_da_applicare],
                                  apply: [handler_track_innestato, callback_da_applicare]};
           const handler_generato = generaHandlerForProxy(handler_track);
-          expect(handler_generato).to.be.an('object').that.have.all.keys('apply', 'construct');
+          expect(handler_generato).to.be.an('object').that.have.all.keys('apply', 'construct', 'get');
           expect(handler_generato).have.property('construct').that.to.be.a('function');
           expect(handler_generato).have.property('apply').that.to.be.a('function');
         });

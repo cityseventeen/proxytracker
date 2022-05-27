@@ -1,6 +1,7 @@
 # Index
 - [Purpose](#purpose)
 - [Utilization](#utilization)
+- [Proxy Remover](#proxyremover)
 
 ## Purpose
 This repository is born to give the chance to separate application logic from error checking and logging, as PragmaticProgrammer and CleanCode practices.
@@ -82,4 +83,19 @@ new entity_tracked('string') // --> assert error
 const instance = new entity_tracked(5,8) // --> console.log(entity_tracked, [5,8])
 instance.sum('string') // --> assert error
 instance.sum(4) // --> console.log([Function sum], thisArg, [4])
+```
+
+## ProxyRemover
+from 0.3.5 is possible to get the orinin entity without proxy, also if is returned by trap.
+
+eg of usage
+```js
+const {ProxyTracker, ProxyRemover} = require('proxy-tracker')
+
+class user_class{}
+const handler = {construct: {get: {}}}
+const user_class_proxy = new ProxyTracker(user_class) // --> return a Proxy. util.types.isProxy(user_class_proxy) === true
+const instance_from_proxy = new user_class_proxy() // --> return a Proxy because there is a trap construct with next get trap
+const origin_instance = ProxyRemover(instance_from_proxy) // return instance without proxy. util.types.isProxy(origin_instance) === false
+
 ```

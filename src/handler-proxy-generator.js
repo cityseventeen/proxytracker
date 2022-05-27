@@ -1,10 +1,15 @@
+/* global Reflect, Function */
+
 const logger = require('./logger.js');
 const assert = require('assert').strict;
 
-function generaHandlerForProxy(handler_of_track_type){
+const {trapRemover} = require('./proxy-remover.js');
+
+function generaHandlerForProxy(handler_of_track_type, entity){
   assert(typeof handler_of_track_type === 'object', 'handler non è stato inserito');
   const handler_generato = creaHandlerRicorsivo(handler_of_track_type);
-  return handler_generato;
+  const handler_with_trap_remover = trapRemover(handler_generato, entity);
+  return handler_with_trap_remover;
 }
 function creaHandlerRicorsivo(handler_of_track_type){
   const handler = {};
@@ -49,14 +54,16 @@ function returnEndingTrapFromList(metodo, handler){
   return (...args)=>{let value_returned_by_trap = ending_trap(...args); return returnProxyOrValue(value_returned_by_trap, handler);};
 
   function returnProxyOrValue(value, handler){
-    if((value instanceof Function || typeof value === 'object') && typeof handler === 'object')
+    if((value instanceof Function || typeof value === 'object') && typeof handler === 'object'){
+      const handler_with_trap_remover = trapRemover(handler, value);
       try{
-        return new Proxy(value, handler);}
+        return new Proxy(value, handler_with_trap_remover);}
       catch(e){
         logger.error({exception: e, value, handler});
         ifExceptionIsntForValueThenThrow(e);
         return value;
       }
+    }
     else return value;
   }
 }
