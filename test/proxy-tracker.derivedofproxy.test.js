@@ -7,7 +7,7 @@ const ambiente = process.env.NODE_ENV;
 const {ProxyTracker} = require(`../proxy-tracker.js`);
 const {createDerivedFromProxy} = require('./test.support.js');
 
-const t = { list_all_traps_for_class: ['get', 'construct', 'defineProperty', 'deleteProperty',
+const t = { list_all_traps_for_class: ['get', 'defineProperty', 'deleteProperty',
                   'getOwnPropertyDescriptor', 'getPrototypeOf', 'has',
                   'isExtensible', 'ownKeys', 'preventExtensions', 'set',
                   'setPrototypeOf'],
@@ -17,7 +17,7 @@ const t = { list_all_traps_for_class: ['get', 'construct', 'defineProperty', 'de
                   'setPrototypeOf']};
 Object.freeze(t);
 
-describe('derived class of proxy - Each trap isnt activated in the derived class', () => {
+describe.only('derived class of proxy - activation of trap in the derived class', () => {
   let bridge;
   let derived_class, base_proxy;
   
@@ -40,17 +40,37 @@ describe('derived class of proxy - Each trap isnt activated in the derived class
       doesSureThatBaseClassProxedActivesTrap(bridge, base_proxy, trap_name);
     });
   for(let trap_name of t.list_all_traps_for_class)
-    it.skip(`${trap_name} isnt activated when the method/param is overwrite in derived class`, () => { //// al momento get construct has e set sono ancor auna trappola.
-      /// per cui, se si vuole una derivata senza trappole, bisogna farla dall'entità originria e non dal proxy dell'entità
-      class derived_with_overwhrite extends base_proxy{
+    it(`${trap_name} isnt activated when the method/param is overwrite in derived class`, () => {
+      class derived_with_overwrite extends base_proxy{
         constructor(){super();}
         static property = 'value';
+        static overwritedMethodFromDerived(){return 'valuemethod';}
       }
       expect(bridge).to.eql([]);
-      activesTrap(derived_class, trap_name);
+      activesTrap(derived_with_overwrite, trap_name);
       expect(bridge).to.be.an('array').that.not.include(`called ${trap_name}`);
       doesSureThatBaseClassProxedActivesTrap(bridge, base_proxy, trap_name);
     });
+  it('metodo sovrascrito in derivata, non attiva trappola di base', () => {
+      class derived_with_overwrite extends base_proxy{
+        constructor(){super();}
+        static property = 'value';
+        static overwritedMethodFromDerived(){return 'valuemethod';}
+      }
+      expect(bridge).to.eql([]);
+      derived_with_overwrite.overwritedMethodFromDerived();
+      expect(bridge).to.be.an('array').that.not.include(`called apply`);
+      void function doesSureMethodDoesntDefinedInBaseClass(){expect(base_proxy.overwritedMethodFromDerived).to.be.undefined;};
+  });
+  it.skip('metodi e parametri non sovrascritti in derivata, attivano la trappola di base', () => {
+    
+  });
+  it.skip('construct di derivata sovrascritto --> attiva o non attiva?', () => {
+    
+  });
+  it.skip('construct di derivata non sovrascritto -> attiva o non attiva?', () => {
+    
+  });
 });
 function svuotaBridge(bridge){
   for(let i=0; i<bridge.length; i++){
@@ -60,7 +80,7 @@ function svuotaBridge(bridge){
 function activesTrap(entity, trap_name){
   let value;
   switch(trap_name){
-    case 'apply': value = Reflect[trap_name](entity, [undefined]); break;
+    case 'apply': value = entity.overwritedMethodFromDerived(); break;
     case 'construct': value = Reflect[trap_name](entity, [undefined]); break;
     case 'defineProperty': value = Reflect[trap_name](entity, 'property', {}); break;
     case 'deleteProperty': value = Reflect[trap_name](entity, 'property'); break;
