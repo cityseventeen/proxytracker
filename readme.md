@@ -3,7 +3,7 @@
 - [Utilization](#utilization)
 - [Proxy Remover](#proxyremover)
 - [Derived Class](#derivedclass)
-
+- [Proxy Extension](#proxyextension)
 ## Purpose
 This repository is born to give the chance to separate application logic from error checking and logging, as PragmaticProgrammer and CleanCode practices.
 
@@ -107,9 +107,10 @@ For the construct trap, it is keeped in the derived class.
 If you don't want traps to derived class, you must to do use ProxyRemover before deriving the class
 
 ## ProxyExtension
-from 0.4.0 is possible to use ProxyExtension, similary to ProxyTracker
+from 0.4.0 is possible to use ProxyExtension, similary to ProxyTracker.
+
 The arguments are the same for ProxyTracker, but the last callback is used for the returned value by trap.
-If handler permits the return of a proxy, and the value returned from callback is a function or object, then the trap return a proxy.
+If handler permits the return of a proxy, and the value returned from callback is a function or object, then the trap returns a proxy.
 
 ### example
 ```js
@@ -129,6 +130,8 @@ proxy(other_value /*, other arguments */) // -> console.log(arguments) and the f
 ```
 
 ### handler
-if handler or sub handler doesn't have any callback, then the value returned by trap is the real value.
-if handler contains more callbacks, only the last callback is used for returing a value by trap.
-if a trap has sub handler, the value returned by trap (real or by last callback) can be a proxy if the value is an Object or a Function.
+If handler or sub handler doesn't have any callback, then the value returned by trap is the real value.
+
+If handler contains more callbacks, only the last callback is used for returning a value by trap.
+
+If a trap has sub handler, the value returned by trap (real or by last callback) can be a proxy if the value is an Object or a Function.
