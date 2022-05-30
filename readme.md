@@ -87,7 +87,7 @@ instance.sum(4) // --> console.log([Function sum], thisArg, [4])
 ```
 
 ## ProxyRemover
-from 0.3.5 is possible to get the origin entity without proxy, also if is returned by trap.
+from 0.3.5 is possible to get the origin entity without proxy, also if is returned by trap. Both for ProxyTracker and ProxyExtension
 
 eg of usage
 ```js
@@ -105,3 +105,30 @@ If you derive a proxy class, the traps has, get, set, construct are keeped.
 Only if you overwrite parameters or methods, the trap disappears.
 For the construct trap, it is keeped in the derived class.
 If you don't want traps to derived class, you must to do use ProxyRemover before deriving the class
+
+## ProxyExtension
+from 0.4.0 is possible to use ProxyExtension, similary to ProxyTracker
+The arguments are the same for ProxyTracker, but the last callback is used for the returned value by trap.
+If handler permits the return of a proxy, and the value returned from callback is a function or object, then the trap return a proxy.
+
+### example
+```js
+const {ProxyExtension} = require('proxy-tracker')
+const first_value = 'value'
+const value_modified = 'value modified'
+const callback_return_value_by_get_apply = function(t, thisarg, args){
+            if(args[0]=first_value) return value_modified
+            else return Reflect.apply(t, thisarg, args);}
+const custom_function = function(st, sd, rd){/* body */}
+const callback_log = function(...args){console.log(...args)}
+const handler = {apply: [callback_log, callback_return_value_by_apply_trap]}
+const proxy = ProxyExtension(custom_function, handler)
+
+proxy(first_value /*, other arguments */) // -> console.log(arguments) and the function return value_modified
+proxy(other_value /*, other arguments */) // -> console.log(arguments) and the function return custom_function(other_value /*, other arguments */)
+```
+
+### handler
+if handler or sub handler doesn't have any callback, then the value returned by trap is the real value.
+if handler contains more callbacks, only the last callback is used for returing a value by trap.
+if a trap has sub handler, the value returned by trap (real or by last callback) can be a proxy if the value is an Object or a Function.
