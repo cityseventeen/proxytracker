@@ -9,7 +9,7 @@ const {ProxyExtension, ProxyTracker} = require(`../proxy-tracker.js`);
 const t = {};
 Object.freeze(t);
 
-describe('ProxyExtension', () => {
+describe.skip('ProxyExtension', () => {
   let classe;
   beforeEach(()=>{
     classe = class{

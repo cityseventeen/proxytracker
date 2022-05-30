@@ -1,40 +1,8 @@
 /* global Reflect, Function */
 
-const logger = require('./logger.js');
 const assert = require('assert').strict;
 
-const {trapRemover, removerProxyForExtends} = require('./proxy-remover.js');
-
-function generaHandlerForProxy(handler_of_track_type, entity){
-  assert(typeof handler_of_track_type === 'object', 'handler non è stato inserito');
-  const handler_generato = creaHandlerRicorsivo(handler_of_track_type);
-  let handler_with_trap_remover = trapRemover(handler_generato, entity);
-  handler_with_trap_remover = removerProxyForExtends(handler_with_trap_remover);
-  return handler_with_trap_remover;
-}
-function creaHandlerRicorsivo(handler_of_track_type){
-  const handler = {};
-  for(let name in handler_of_track_type){
-    const {cbs, hds} = splitCallbackObject(handler_of_track_type[name]);
-    let trappola;
-    if(typeof hds === 'object'){
-      let sub_handler = creaHandlerRicorsivo(hds);
-      let returning = returnEndingTrapFromList(name, sub_handler);
-      trappola = template_trap(cbs, returning);
-    }
-    else{
-      let returningTrapSimple = returnEndingTrapFromList(name);
-      trappola = template_trap(cbs, returningTrapSimple);
-    }
-    handler[name] = trappola;
-  }
-  return handler;
-}
-function splitCallbackObject(list){
-  return {cbs: list.cbs,
-          hds: list.hds};
-}
-function returnEndingTrapFromList(metodo, handler){
+const default_trapList = function returnEndingTrapFromList(metodo){
   const ending_of_trap_list = {
      apply(target, thisArg, args){return Reflect.apply(...arguments);},
      construct(target, args, newtarget){return Reflect.construct(...arguments);},
@@ -51,23 +19,66 @@ function returnEndingTrapFromList(metodo, handler){
      setPrototypeOf(target, prototype){return Reflect.setPrototypeOf(...arguments);}
   };
   let ending_trap = ending_of_trap_list[metodo];
-  if(ending_trap === undefined) throw new TypeError(`La trappola non è del tipo previsto da Proxy, ma è ${metodo}`);
-  return (...args)=>{let value_returned_by_trap = ending_trap(...args); return returnProxyOrValue(value_returned_by_trap, handler);};
+  return ending_trap;
+};
 
-  function returnProxyOrValue(value, handler){
-    if((value instanceof Function || typeof value === 'object') && typeof handler === 'object'){
-      let handler_with_trap_remover = trapRemover(handler, value);
-      handler_with_trap_remover = removerProxyForExtends(handler_with_trap_remover);
-      try{
-        return new Proxy(value, handler_with_trap_remover);}
-      catch(e){
-        logger.error({exception: e, value, handler});
-        ifExceptionIsntForValueThenThrow(e);
-        return value;
-      }
+function generaHandlerForProxy(handler_of_track_type, entity = undefined, modifiesHandler = undefined, trapList = default_trapList){
+  checkHandler({trapList, handler_of_track_type, modifiesHandler});
+
+  const handler_generato = creaHandlerRicorsivo(handler_of_track_type, trapList, modifiesHandler);
+
+  if(modifiesHandler !== undefined) return modifiesHandler(handler_generato, entity);
+  else return handler_generato;
+}
+function checkHandler({trapList, handler_of_track_type, modifiesHandler}){
+  assert(typeof trapList === 'function');
+  assert(typeof handler_of_track_type === 'object', 'handler non è stato inserito');
+  assert(modifiesHandler === undefined || typeof modifiesHandler === 'function', 'callback for changing handler must to be a function');
+}
+function creaHandlerRicorsivo(handler_of_track_type, trapList, modifiesHandler){
+  const handler = {};
+  for(let name in handler_of_track_type){
+    const {cbs, hds} = splitCallbackObject(handler_of_track_type[name]);
+    let trappola;
+    if(typeof hds === 'object'){
+      let sub_handler = creaHandlerRicorsivo(hds, trapList, modifiesHandler);
+      let returning = returnEndingTrap(name, trapList, sub_handler, modifiesHandler);
+      trappola = template_trap(cbs, returning);
     }
-    else return value;
+    else{
+      let returningTrapWithoutProxy = returnEndingTrap(name, trapList);
+      trappola = template_trap(cbs, returningTrapWithoutProxy);
+    }
+    handler[name] = trappola;
   }
+  return handler;
+}
+function splitCallbackObject(list){
+  return {cbs: list.cbs,
+          hds: list.hds};
+}
+function returnEndingTrap(trap_name, trap_list, handler, modifiesHandler){
+  let function_for_returning_value_by_trap = trap_list(trap_name);
+  if(function_for_returning_value_by_trap === undefined) throw new TypeError(`La trappola non è del tipo previsto da Proxy, ma è ${trap_name}`);
+  return (...args)=>{ let value_returned_by_trap = function_for_returning_value_by_trap(...args);
+                      let handler_modified;
+                      if(typeof modifiesHandler === 'function')
+                        handler_modified = modifiesHandler(handler, value_returned_by_trap);
+                      return returnProxyOrValue(value_returned_by_trap, handler_modified);};
+}
+
+function returnProxyOrValue(value, handler){
+  const logger = require('./logger.js');
+  if((value instanceof Function || typeof value === 'object') && typeof handler === 'object'){
+    try{
+      return new Proxy(value, handler);}
+    catch(e){
+      logger.error({exception: e, value, handler});
+      ifExceptionIsntForValueThenThrow(e);
+      return value;
+    }
+  }
+  else return value;
 }
 function ifExceptionIsntForValueThenThrow(e){
   if(e.message === 'Cannot create proxy with a non-object') throw e;
