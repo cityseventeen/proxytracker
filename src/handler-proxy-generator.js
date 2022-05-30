@@ -31,7 +31,7 @@ function generaHandlerForProxy(handler_of_track_type, entity = undefined, modifi
   else return handler_generato;
 }
 function checkHandler({trapList, handler_of_track_type, modifiesHandler}){
-  assert(typeof trapList === 'function');
+  assert(typeof trapList === 'function', 'traplist must to be a function');
   assert(typeof handler_of_track_type === 'object', 'handler non è stato inserito');
   assert(modifiesHandler === undefined || typeof modifiesHandler === 'function', 'callback for changing handler must to be a function');
 }

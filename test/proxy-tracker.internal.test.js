@@ -4,21 +4,10 @@ const util = require('util');
 
 const ambiente = process.env.NODE_ENV;
 
-const t = {};
+const t = { args_for_testing_traplist: [{}, undefined, undefined],
+            args_for_testing_modifiesHandler: [{}, undefined]};
 Object.freeze(t);
 
-
-// test aggiuntivi
-  /*    it('handler_track vuoto, {} -> return objec with get trap for remover proxy function', () => {
-        expect(generaHandlerForProxy({})).to.be.an('object');
-        .that.have.all.keys('get').and.that.have.property('get').that.to.be.a('function');
-      });
-        it('che ha solo una callback', () => {
-          const callback_da_applicare = function(...arg){};
-          const handler = {apply: [callback_da_applicare]};
-          expect(generaHandlerForProxy(handler)).to.be.an('object').that.have.all.keys('apply', 'get').and.that.have.property('apply').that.to.be.a('function');
-        });
-*/
 
 if(ambiente === 'dev'){
   const {generaHandlerForProxyTrack ,generaHandlerForProxy} = require(`../proxy-tracker.js`).test;
@@ -85,7 +74,18 @@ if(ambiente === 'dev'){
           expect(handler_generato).have.property('apply').that.to.be.a('function');
         });
       });
-  
+      describe('function modifies handler', () => {
+        for(let wrong of [0, -5, +8, false, true, [], {}, 'string'])
+          it('modifiesHandler != function or undefined throws error', () => {
+            expect(()=>{generaHandlerForProxy(...t.args_for_testing_modifiesHandler, wrong)}).to.throw('callback for changing handler must to be a function');
+          });
+      });
+      describe('different trap list', () => {
+        for(let wrong of [0, -5, +8, false, true, [], {}, 'string'])
+          it('traplist != function or undefined throws error', () => {
+            expect(()=>{generaHandlerForProxy(...t.args_for_testing_traplist, wrong)}).to.throw('traplist must to be a function');
+          });
+      });
     });
     describe('genera handlers track - funzioni non anonime', () => {
       const function_fake_anonymous = function(){};
