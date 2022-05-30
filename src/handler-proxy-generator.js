@@ -24,29 +24,36 @@ const default_trapList = function returnEndingTrapFromList(metodo){
 
 function generaHandlerForProxy(handler_of_track_type, entity = undefined, modifiesHandler = undefined, trapList = default_trapList){
   checkHandler({trapList, handler_of_track_type, modifiesHandler});
-
-  const handler_generato = creaHandlerRicorsivo(handler_of_track_type, trapList, modifiesHandler);
+  const handler_generato = creaHandlerRicorsivo(handler_of_track_type, trapListWithCheck(trapList), modifiesHandler);
 
   if(modifiesHandler !== undefined) return modifiesHandler(handler_generato, entity);
   else return handler_generato;
 }
-function checkHandler({trapList, handler_of_track_type, modifiesHandler}){
+function checkHandler({handler_of_track_type, trapList, modifiesHandler}){
   assert(typeof trapList === 'function', 'traplist must to be a function');
   assert(typeof handler_of_track_type === 'object', 'handler non è stato inserito');
   assert(modifiesHandler === undefined || typeof modifiesHandler === 'function', 'callback for changing handler must to be a function');
 }
+function trapListWithCheck(trap_list){
+  return function(trap_name){
+    const returning_value_by_trap_callback = trap_list(trap_name);
+    if(returning_value_by_trap_callback === undefined) throw new TypeError(`La trappola non è del tipo previsto da Proxy, ma è ${trap_name}`);
+    return returning_value_by_trap_callback;
+  };
+}
 function creaHandlerRicorsivo(handler_of_track_type, trapList, modifiesHandler){
   const handler = {};
   for(let name in handler_of_track_type){
-    const {cbs, hds} = splitCallbackObject(handler_of_track_type[name]);
+    const {cbs, hds, ret} = splitCallbackObject(handler_of_track_type[name]);
     let trappola;
+    let returning_value_callback = (ret===undefined?trapList(name):ret);
     if(typeof hds === 'object'){
       let sub_handler = creaHandlerRicorsivo(hds, trapList, modifiesHandler);
-      let returning = returnEndingTrap(name, trapList, sub_handler, modifiesHandler);
+      let returning = returnEndingTrap(returning_value_callback, sub_handler, modifiesHandler);
       trappola = template_trap(cbs, returning);
     }
     else{
-      let returningTrapWithoutProxy = returnEndingTrap(name, trapList);
+      let returningTrapWithoutProxy = returnEndingTrap(returning_value_callback);
       trappola = template_trap(cbs, returningTrapWithoutProxy);
     }
     handler[name] = trappola;
@@ -55,12 +62,11 @@ function creaHandlerRicorsivo(handler_of_track_type, trapList, modifiesHandler){
 }
 function splitCallbackObject(list){
   return {cbs: list.cbs,
-          hds: list.hds};
+          hds: list.hds,
+          ret: list.ret};
 }
-function returnEndingTrap(trap_name, trap_list, handler, modifiesHandler){
-  let function_for_returning_value_by_trap = trap_list(trap_name);
-  if(function_for_returning_value_by_trap === undefined) throw new TypeError(`La trappola non è del tipo previsto da Proxy, ma è ${trap_name}`);
-  return (...args)=>{ let value_returned_by_trap = function_for_returning_value_by_trap(...args);
+function returnEndingTrap(returning_value_callback, handler, modifiesHandler){
+  return (...args)=>{ let value_returned_by_trap = returning_value_callback(...args);
                       let handler_modified;
                       if(typeof modifiesHandler === 'function')
                         handler_modified = modifiesHandler(handler, value_returned_by_trap);
