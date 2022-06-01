@@ -65,5 +65,19 @@ describe('ProxyExtension', () => {
     expect(value).to.equal(classe.statprop);
     expect(bridge).to.eql(['cb3 called']);
   });
+  it.skip('proxy created with handler that have no callback, return the real value', () => {
+    const handler = {get: [cb3, {apply: cb2}]};
+    const proxy = new ProxyExtension(classe, handler);
+  });
+  it('proxy created with handler grafted that have no callback, return the proxy value', () => {
+    const handler = {get: {apply: cb1}};
+    const proxy = new ProxyExtension(classe, handler);
+    let value = proxy.statmet2;
+    expect(util.types.isProxy(value)).to.be.true;
+    
+    let value_returned_by_function = proxy.statmet2();
+    expect(util.types.isProxy(value_returned_by_function)).to.be.false;
+    expect(bridge).to.eql(['cb1 called']);
+  });
   
 });
