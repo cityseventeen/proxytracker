@@ -1,3 +1,13 @@
+# Proxy Tracker
+[![Test][test-pass-img]][test-pass-url]
+[![Commit Number][commit-number-img]][commit-number-url]
+
+[test-pass-img]: https://github.com/CitySeventeen/ProxyTracker/workflows/Node.js%20CI/badge.svg
+[test-pass-url]: https://github.com/CitySeventeen/ProxyTracker/actions/workflows/node.js.yml
+
+[commit-number-img]: https://img.shields.io/github/commit-activity/m/CitySeventeen/ProxyTracker
+[commit-number-url]: https://github.com/CitySeventeen/ProxyTracker/commits/main
+
 # Index
 - [Purpose](#purpose)
 - [Utilization](#utilization)
