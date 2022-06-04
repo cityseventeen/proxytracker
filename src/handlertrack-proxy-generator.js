@@ -1,18 +1,16 @@
 const assert = require('assert').strict;
 
+const {check, errors} = require('./errors.js');
+
 function generaHandlerForProxyTrack(...callbacks_for_tracker){
-  const handler_track = creaRiferimento();
+  const handler_track = creaSubHandlerTrack();
   checkArgsForGeneraHandlersTrack(...callbacks_for_tracker);
   unisciHandlersRicorsivo(handler_track, ...callbacks_for_tracker);
      
-  return puntatoreRiferimento(handler_track);
+  return handler_track.hds;
 }
-function creaRiferimento(){
+function creaSubHandlerTrack(){
   return {hds: undefined, cbs: []};
-}
-function puntatoreRiferimento(riferimento, name){
-  if(typeof name === 'string') return riferimento.hds[name];
-  else return riferimento.hds;
 }
 function checkArgsForGeneraHandlersTrack(...args){
   for(let arg of args){
@@ -20,6 +18,7 @@ function checkArgsForGeneraHandlersTrack(...args){
   }
 }
 function unisciHandlersRicorsivo(handler_track, ...elements){
+  debugger;
   for(let element of elements){
     if(element === undefined) continue;
     ifElementInvalidThrowError(element);
@@ -29,28 +28,56 @@ function unisciHandlersRicorsivo(handler_track, ...elements){
     else{
       if(Array.isArray(element)) unisciHandlersRicorsivo(handler_track, ...element);
       else{
-        insertSubHandler(handler_track);
-        for(let name in element){
-          insertSubHandler(handler_track, name);
-          unisciHandlersRicorsivo(puntatoreRiferimento(handler_track, name), element[name]);
+        let traps_list = Object.keys(element);
+        if(element.FOR !== undefined){
+          let rif_handler = insertFORinHandler(handler_track, element);
+          traps_list = traps_list.filter(el => el !== 'FOR');
+          for(let name of traps_list){
+            insertTrapSubHandler(rif_handler, name);
+            unisciHandlersRicorsivo(rif_handler[name], element[name]);
+          }
         }
+        else
+          for(let name of traps_list){
+            if(handler_track.hds === undefined) handler_track.hds = {};
+            insertTrapSubHandler(handler_track.hds, name);
+            unisciHandlersRicorsivo(handler_track.hds[name], element[name]);
+          }
       }
     }
   }
   
 }
-function pushCallback(handler, func){
-  handler.cbs.push(func);
-}
-function insertSubHandler(riferimento, name){
-  if(riferimento.hds === undefined) riferimento.hds = {};
-  if(name !== undefined && !(name in riferimento.hds)) riferimento.hds[name] = creaRiferimento();
-}
-
 function ifElementInvalidThrowError(element){
   assert(     ((typeof element === 'function')
           ||  (typeof element === 'object' && !Array.isArray(element))
           ||   Array.isArray(element)), `ricevuto ${typeof element}. elemento deve essere function, object, o array`);
 }
+function pushCallback(handler, func){
+  handler.cbs.push(func);
+}
+function insertTrapSubHandler(riferimento, name){
+  if(name !== undefined && !(name in riferimento)) riferimento[name] = creaSubHandlerTrack();
+}
+function insertFORinHandler(handler_track, element){
+  let name = element.FOR;
+  check.error(typeof name === 'string', errors.name_for_in_handler_isnt_string(name));
+  let rif = insertFORtarget(handler_track, name);
+  return rif;
+}
+function insertFORtarget(riferimento, target){
+  assert(typeof target === 'string');
+  if(riferimento.FOR === undefined) riferimento.FOR = [];
+  return returnRifNAMEInArrayEntered(riferimento.FOR, target);
+}
+function returnRifNAMEInArrayEntered(array, target){
+  for(let el of array){
+    if(el.NAME === target) return el;
+  }
+  let length = array.push({NAME: target});
+  return array[length-1];
+}
+
+
 
 module.exports = generaHandlerForProxyTrack;

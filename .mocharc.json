@@ -1,10 +1,10 @@
 {
     "spec": ["test/"],
-    "exit": true,
+    "exit": false,
     "ui": "bdd",
     "exclude": [],
-    "watch": false,
-    "watch-files": [],
+    "watch": true,
+    "watch-files": ["./src/**", "./test/**"],
     "diff": true,
     "colors": true,
     "reporter": "spec",

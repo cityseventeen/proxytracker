@@ -63,7 +63,8 @@ function creaHandlerRicorsivo(handler_of_track_type, trapList, modifiesHandler){
 function splitCallbackObject(list){
   return {cbs: list.cbs,
           hds: list.hds,
-          ret: list.ret};
+          ret: list.ret,
+          name: list.name};
 }
 function returnEndingTrap(returning_value_callback, handler, modifiesHandler){
   return (...args)=>{ let value_returned_by_trap = returning_value_callback(...args);
