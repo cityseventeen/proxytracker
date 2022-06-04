@@ -30,11 +30,14 @@ function unisciHandlersRicorsivo(handler_track, ...elements){
       else{
         let traps_list = Object.keys(element);
         if(element.FOR !== undefined){
-          let rif_handler = insertFORinHandler(handler_track, element);
-          traps_list = traps_list.filter(el => el !== 'FOR');
-          for(let name of traps_list){
-            insertTrapSubHandler(rif_handler, name);
-            unisciHandlersRicorsivo(rif_handler[name], element[name]);
+          let name_FOR_list = Array.isArray(element.FOR)?element.FOR:[element.FOR];
+          for(let name_FOR of name_FOR_list){
+            let rif_handler = insertFORinHandler(handler_track, name_FOR);
+            traps_list = traps_list.filter(el => el !== 'FOR');
+            for(let name of traps_list){
+              insertTrapSubHandler(rif_handler, name);
+              unisciHandlersRicorsivo(rif_handler[name], element[name]);
+            }
           }
         }
         else
@@ -59,8 +62,7 @@ function pushCallback(handler, func){
 function insertTrapSubHandler(riferimento, name){
   if(name !== undefined && !(name in riferimento)) riferimento[name] = creaSubHandlerTrack();
 }
-function insertFORinHandler(handler_track, element){
-  let name = element.FOR;
+function insertFORinHandler(handler_track, name){
   check.error(typeof name === 'string', errors.name_for_in_handler_isnt_string(name));
   let rif = insertFORtarget(handler_track, name);
   return rif;

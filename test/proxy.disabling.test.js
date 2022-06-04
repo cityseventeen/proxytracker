@@ -61,9 +61,16 @@ describe.only('internal handler track generator', () => {
       const expected = {get: {cbs: [cb01], hds: undefined, FOR: [{NAME: 'prop1', get: {cbs: [cb02], hds: undefined}}]}};
       expect(generaHandlerForProxyTrack(handler)).to.eql(expected);
     });
+    it('name: array of value return expected', () => {
+      const cb01 = cbs(bridge).cb01;
+      const cb02 = cbs(bridge).cb02;
+      const handler = {get: [cb01, {FOR: ['prop1', 'prop2'], get: cb02}]};
+      const expected = {get: {cbs: [cb01], hds: undefined, FOR: [{NAME: 'prop1', get: {cbs: [cb02], hds: undefined}}, {NAME: 'prop2', get: {cbs: [cb02], hds: undefined}}]}};
+      expect(generaHandlerForProxyTrack(handler)).to.eql(expected);
+    });
     
     describe('wrong value', () => {
-      for(let wrong of [['array string'], {key: 'value'}, function(){return 'value';}, 0,-8,+5,true, false]){
+      for(let wrong of [{key: 'value'}, function(){return 'value';}, 0,-8,+5,true, false]){
         it(`name of FOR ${wrong} that isnt string or undefined throws error`, () => {
           const handler = {get: {FOR: wrong, get: function(){}}};
           expect(()=>{generaHandlerForProxyTrack(handler);}).to.throw(errors.name_for_in_handler_isnt_string);
