@@ -44,18 +44,16 @@ function trapListWithCheck(trap_list){
 function creaHandlerRicorsivo(handler_of_track_type, trapList, modifiesHandler){
   const handler = {};
   for(let name in handler_of_track_type){
-    const {cbs, hds, ret} = splitCallbackObject(handler_of_track_type[name]);
+    const {cbs, hds, ret, FOR} = splitCallbackObject(handler_of_track_type[name]);
     let trappola;
     let returning_value_callback = (ret===undefined?trapList(name):ret);
+    let sub_handler;
     if(typeof hds === 'object'){
-      let sub_handler = creaHandlerRicorsivo(hds, trapList, modifiesHandler);
-      let returning = returnEndingTrap(returning_value_callback, sub_handler, modifiesHandler);
-      trappola = template_trap(cbs, returning);
+      sub_handler = creaHandlerRicorsivo(hds, trapList, modifiesHandler);
     }
-    else{
-      let returningTrapWithoutProxy = returnEndingTrap(returning_value_callback);
-      trappola = template_trap(cbs, returningTrapWithoutProxy);
-    }
+    let returning = returnEndingTrap(returning_value_callback, sub_handler, modifiesHandler);
+    trappola = template_trap(cbs, returning);
+
     handler[name] = trappola;
   }
   return handler;
@@ -64,13 +62,17 @@ function splitCallbackObject(list){
   return {cbs: list.cbs,
           hds: list.hds,
           ret: list.ret,
-          name: list.name};
+          FOR: list.FOR};
 }
 function returnEndingTrap(returning_value_callback, handler, modifiesHandler){
   return (...args)=>{ let value_returned_by_trap = returning_value_callback(...args);
-                      let handler_modified;
-                      if(typeof modifiesHandler === 'function')
-                        handler_modified = modifiesHandler(handler, value_returned_by_trap);
+                      let handler_modified = undefined;
+                      if(typeof handler === 'object'){
+                        if(typeof modifiesHandler === 'function')
+                          handler_modified = modifiesHandler(handler, value_returned_by_trap);
+                        else
+                          handler_modified = handler;
+                      }
                       return returnProxyOrValue(value_returned_by_trap, handler_modified);};
 }
 
