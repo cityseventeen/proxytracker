@@ -3,7 +3,7 @@
     "exit": false,
     "ui": "bdd",
     "exclude": [],
-    "watch": true,
+    "watch": false,
     "watch-files": ["./src/**", "./test/**"],
     "diff": true,
     "colors": true,

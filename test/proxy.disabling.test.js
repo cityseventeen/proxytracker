@@ -14,11 +14,11 @@ Object.freeze(t);
 function cbs(bridge, trap){
   this.cb_ret = function (...args){bridge.push(`${trap} callback called`); return Reflect[trap](...args);};
   this.cb = function (...args){bridge.push(`${trap} callback called`); let [, ...trap_args] = args; return Reflect[trap](...trap_args);};
-  this.cb01 = function(){};
-  this.cb02 = function(){};
+  this.cb01 = function cb01(){};
+  this.cb02 = function cb02(){};
   return this;
 }
-describe.only('disabling proxy feature for trap', () => {
+describe('disabling proxy feature for trap', () => {
   let bridge;
   beforeEach(()=>{
     bridge = [];
@@ -47,7 +47,7 @@ describe.only('disabling proxy feature for trap', () => {
   
   
 });
-describe.only('internal handler track generator', () => {
+describe('internal handler track generator', () => {
   let bridge;
   beforeEach(()=>{
     bridge = [];
@@ -67,6 +67,38 @@ describe.only('internal handler track generator', () => {
       const handler = {get: [cb01, {FOR: ['prop1', 'prop2'], get: cb02}]};
       const expected = {get: {cbs: [cb01], hds: undefined, FOR: [{NAME: 'prop1', get: {cbs: [cb02], hds: undefined}}, {NAME: 'prop2', get: {cbs: [cb02], hds: undefined}}]}};
       expect(generaHandlerForProxyTrack(handler)).to.eql(expected);
+    });
+    it('complec case', () => {
+      const cb01 = cbs(bridge).cb01;
+      const cb02 = cbs(bridge).cb02;
+      const handler =  [{get: [cb01, {FOR: ['prop1', 'prop2'], get: cb02}]},
+                        {get: cb02},
+                        {get: {FOR: 'prop3', apply: cb02}},
+                        {has: [cb01, cb02]},
+                        {apply: {FOR: 'prop1', get: cb01}},
+                        {get: {FOR: 'prop1', get: cb01, has: cb02}},
+                        {get: {FOR: ['prop1', 'prop3'], get: cb01, apply: cb02}},
+                        {apply: cb01},
+                        {set: {FOR: 'prop1', get: cb01}},
+                        {set: {has: cb01}},
+                        {trap1: {trap2: [cb01, {trap3: cb02}, {trap3: cb02}, {trap3: {trap4: cb01}}, {trap3: {FOR: 'prop8', trap8: {trap9: cb02}}}]}}
+      ];
+      const expected = {get: {cbs: [cb01], hds: undefined, FOR: [{NAME: 'prop1', get: {cbs: [cb02], hds: undefined}}, {NAME: 'prop2', get: {cbs: [cb02], hds: undefined}}]}};
+      expected.get.cbs.push(cb02);
+      expected.get.FOR.push({NAME: 'prop3', apply: {cbs: [cb02], hds: undefined}});
+      expected.has = {cbs: [cb01, cb02], hds: undefined};
+      expected.apply = {cbs: [], hds: undefined, FOR: [{NAME: 'prop1', get: {cbs: [cb01], hds: undefined}}]};
+      expected.get.FOR[0].get.cbs.push(cb01); expected.get.FOR[0].has = {cbs: [cb02], hds: undefined};
+      expected.get.FOR[0].get.cbs.push(cb01); expected.get.FOR[0].apply = {cbs: [cb02], hds: undefined};
+      expected.get.FOR[2].get = {cbs: [cb01], hds: undefined}; expected.get.FOR[2].apply.cbs.push(cb02);
+      expected.apply.cbs.push(cb01);
+      expected.set = {cbs: [], hds: undefined, FOR: [{NAME: 'prop1', get: {cbs: [cb01], hds: undefined}}]};
+      expected.set.hds = {has: {cbs: [cb01], hds: undefined}};
+      expected.trap1 = {cbs: [], hds: {trap2: {cbs: [cb01], hds: {trap3: {cbs: [cb02, cb02], hds: {trap4: {cbs: [cb01], hds: undefined}},
+            FOR: [{NAME: 'prop8', trap8: {cbs: [], hds: {trap9:{cbs: [cb02], hds: undefined} } }}]
+          }}}}};
+      
+      expect(generaHandlerForProxyTrack(...handler)).to.eql(expected);
     });
     
     describe('wrong value', () => {

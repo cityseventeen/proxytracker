@@ -18,7 +18,6 @@ function checkArgsForGeneraHandlersTrack(...args){
   }
 }
 function unisciHandlersRicorsivo(handler_track, ...elements){
-  debugger;
   for(let element of elements){
     if(element === undefined) continue;
     ifElementInvalidThrowError(element);
@@ -40,17 +39,20 @@ function unisciHandlersRicorsivo(handler_track, ...elements){
             }
           }
         }
-        else
+        else{
+          if(handler_track.hds === undefined) handler_track.hds = {};
           for(let name of traps_list){
-            if(handler_track.hds === undefined) handler_track.hds = {};
             insertTrapSubHandler(handler_track.hds, name);
             unisciHandlersRicorsivo(handler_track.hds[name], element[name]);
           }
+        }
       }
+
     }
   }
-  
 }
+
+
 function ifElementInvalidThrowError(element){
   assert(     ((typeof element === 'function')
           ||  (typeof element === 'object' && !Array.isArray(element))
