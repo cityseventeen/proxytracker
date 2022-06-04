@@ -52,19 +52,5 @@ function ifElementInvalidThrowError(element){
           ||  (typeof element === 'object' && !Array.isArray(element))
           ||   Array.isArray(element)), `ricevuto ${typeof element}. elemento deve essere function, object, o array`);
 }
-function isAnonymousFunction(func){
-  if(func.name === '') return true;
-  else return false;
-}
-function* scorriElementiGenerator(target){
-  if(typeof target === 'object' && !Array.isArray(target))
-    for(let elem in target) yield elem;
-  else if(Array.isArray(target))
-    for(let elem of target){
-      let obj = {}; obj[elem] = target[elem];
-      yield obj;
-    }
-  else yield target;
-}
 
 module.exports = generaHandlerForProxyTrack;
