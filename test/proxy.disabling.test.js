@@ -8,7 +8,8 @@ const ENVIRONMENT = process.env.NODE_ENV;
 const {ProxyTracker, ProxyExtension} = require(`../proxy-tracker.js`);
 const errors = require('../src/errors.js').errors.message;
 
-const t = {entity_obj: {prop: 5, met: function(){return {prop_nested: 'value', met_nested: function(){return {prop_nested2: 'value'};}};}}};
+const t = {entity_obj: {prop: 5, met: function(){return {prop_nested: 'value', met_nested: function(){return {prop_nested2: 'value'};}};},
+                                 met_in_FOR: function(){return {prop_nested: 'value', met_nested: function(){return {prop_nested2: 'value'};}};}}};
 Object.freeze(t);
 
 function cbs(bridge, trap){
@@ -24,7 +25,7 @@ describe('disabling proxy feature for trap', () => {
     bridge = [];
   });
   
-  it('ProxyTracker: handler without dis_key doesnt throw error and work normally', () => {
+  it('ProxyTracker: handler without key FOR doesnt throw error and work normally', () => {
     const handler = {get: {apply: [cbs(bridge, 'apply').cb, {get: cbs(bridge, 'get').cb}]}};
     const proxy_entity = new ProxyTracker(t.entity_obj, handler);
     
@@ -34,7 +35,7 @@ describe('disabling proxy feature for trap', () => {
     let value_nested = value.met_nested; expect(bridge).to.eql(['apply callback called', 'get callback called']);
     expect(util.types.isProxy(value_nested)).to.be.false;
   });
-  it('ProxyExtension: handler without dis_key doesnt throw error and work normally', () => {
+  it('ProxyExtension: handler without key FOR doesnt throw error and work normally', () => {
     const handler = {get: {apply: [cbs(bridge, 'apply').cb_ret, {get: cbs(bridge, 'get').cb_ret}]}};
     const proxy_entity = new ProxyExtension(t.entity_obj, handler);
     
@@ -42,6 +43,22 @@ describe('disabling proxy feature for trap', () => {
     let value = proxy_entity.met(); expect(bridge).to.eql(['apply callback called']);
     expect(util.types.isProxy(value)).to.be.true;
     let value_nested = value.met_nested; expect(bridge).to.eql(['apply callback called', 'get callback called']);
+    expect(util.types.isProxy(value_nested)).to.be.false;
+  });
+  it('proxy tracker: handler with key FOR abilits handler only for name prop in FOR', () => {
+    const handler = {get: {FOR: 'met_in_FOR', apply: [cbs(bridge, 'apply').cb, {get: cbs(bridge, 'get').cb}]}};
+    const proxy_entity = new ProxyTracker(t.entity_obj, handler);
+    
+    proxy_entity.met; expect(bridge).to.eql([]);
+    let value = proxy_entity.met(); expect(bridge).to.eql([]);
+    expect(util.types.isProxy(value)).to.be.false;
+    let value_nested = value.met_nested; expect(bridge).to.eql([]);
+    expect(util.types.isProxy(value_nested)).to.be.false;
+    
+    proxy_entity.met_in_FOR; expect(bridge).to.eql([]);
+    value = proxy_entity.met_in_FOR(); expect(bridge).to.eql(['apply callback called']);
+    expect(util.types.isProxy(value)).to.be.true;
+    value_nested = value.met_nested; expect(bridge).to.eql(['apply callback called', 'get callback called']);
     expect(util.types.isProxy(value_nested)).to.be.false;
   });
   
@@ -68,7 +85,7 @@ describe('internal handler track generator', () => {
       const expected = {get: {cbs: [cb01], hds: undefined, FOR: [{NAME: 'prop1', get: {cbs: [cb02], hds: undefined}}, {NAME: 'prop2', get: {cbs: [cb02], hds: undefined}}]}};
       expect(generaHandlerForProxyTrack(handler)).to.eql(expected);
     });
-    it('complec case', () => {
+    it('complex case', () => {
       const cb01 = cbs(bridge).cb01;
       const cb02 = cbs(bridge).cb02;
       const handler =  [{get: [cb01, {FOR: ['prop1', 'prop2'], get: cb02}]},
