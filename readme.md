@@ -96,6 +96,20 @@ instance.sum('string') // --> assert error
 instance.sum(4) // --> console.log([Function sum], thisArg, [4])
 ```
 
+### choose handler function
+From 0.5.0v it is possible to choose the handler according to parameter name
+Warning: use it only on ProxyTracker. ProxyExtension must to be still tested.
+```js
+const entity = {prop: {key: 'value', method(){/**/}, other_method(){}}};
+const handler = {get: {FOR: 'method', apply: callback}}
+const proxy = new ProxyTracker(entity, handler);
+
+proxy.prop // -> it is not a proxy, because proxy is returned only if param is 'method'
+
+proxy.method() // -> called callback
+proxy.other_method() // -> callback is not called.
+```
+
 ## ProxyRemover
 from 0.3.5 is possible to get the origin entity without proxy, also if is returned by trap. Both for ProxyTracker and ProxyExtension
 
@@ -140,8 +154,6 @@ proxy(other_value /*, other arguments */) // -> console.log(arguments) and the f
 ```
 
 ### handler
-If handler or sub handler doesn't have any callback, then the value returned by trap is the real value.
-
-If handler contains more callbacks, only the last callback is used for returning a value by trap.
-
-If a trap has sub handler, the value returned by trap (real or by last callback) can be a proxy if the value is an Object or a Function.
+* If handler or sub handler doesn't have any callback, then the value returned by trap is the real value.
+* If handler contains more callbacks, only the last callback is used for returning a value by trap.
+* If a trap has sub handler, the value returned by trap (real or by last callback) can be a proxy if the value is an Object or a Function.

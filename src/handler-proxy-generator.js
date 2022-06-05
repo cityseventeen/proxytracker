@@ -103,7 +103,7 @@ function chooseHandler(trap_name, args, handler){
   if(name_prop === undefined) return handler[EACH];
 
   if(name_prop in handler)
-    return handler[name_prop];
+    return joinTrapsHandler(handler[name_prop], handler[EACH]);
   else
     return handler[EACH];
 }
@@ -118,9 +118,20 @@ function extractPropertyNameFromArgsTrap(trap_name, args){
     case 'has': [,prop_name] = args; break;
     case 'set': [,prop_name] = args; break;
     default: prop_name = undefined;
-  }
-  
+  }  
   return prop_name;
+}
+
+function joinTrapsHandler(handler_master, handler_slave){
+  if(handler_slave === undefined) return handler_master;
+  const handler_joined = {};
+  for(let trap in handler_master){
+    handler_joined[trap] = function(...args){
+                            if(handler_slave[trap] !== undefined)
+                              handler_slave[trap](...args);
+                            return handler_master[trap](...args);}; 
+  }
+  return handler_joined;
 }
 
 function returnProxyOrValue(value, handler){

@@ -15,6 +15,7 @@ Object.freeze(t);
 function cbs(bridge, trap){
   this.cb_ret = function (...args){bridge.push(`${trap} callback called`); return Reflect[trap](...args);};
   this.cb = function (...args){bridge.push(`${trap} callback called`); let [, ...trap_args] = args; return Reflect[trap](...trap_args);};
+  this.cb1 = function (...args){bridge.push(`${trap}`);};
   this.cb01 = function cb01(){};
   this.cb02 = function cb02(){};
   return this;
@@ -61,6 +62,64 @@ describe('disabling proxy feature for trap', () => {
     value_nested = value.met_nested; expect(bridge).to.eql(['apply callback called', 'get callback called']);
     expect(util.types.isProxy(value_nested)).to.be.false;
   });
+  it('proxy tracker: hander with and without FOR. return expected', () => {
+    const handler = [{get: {FOR: 'met_in_FOR', apply: cbs(bridge, 'apply FOR').cb1}},
+                     {get: {apply: cbs(bridge, 'apply each').cb1}}];
+    const proxy_entity = new ProxyTracker(t.entity_obj, ...handler);
+    
+    bridge_expect = [];
+    proxy_entity.met(); bridge_expect.push('apply each'); expect(bridge).to.eql(bridge_expect);
+    proxy_entity.met_in_FOR(); bridge_expect.push('apply each'); bridge_expect.push('apply FOR'); expect(bridge).to.eql(bridge_expect);
+  });
+  it('proxy tracker: handler with FOR in apply', () => {
+    const handler = {apply: {FOR: 'met', apply: cbs(bridge, 'apply').cb1}};
+    const proxy_entity = new ProxyTracker(function met(){return function nested_met(){return 'value';};}, handler);
+    
+    bridge_expect = [];
+    let value = proxy_entity(); expect(bridge).to.eql(bridge_expect);
+    value(); bridge_expect.push('apply'); expect(bridge).to.eql(bridge_expect); 
+    
+    const proxy_entity2 = new ProxyTracker(function other_met(){return function nested_met(){return 'value';};}, handler);
+    value = proxy_entity2(); expect(bridge).to.eql(bridge_expect);
+    value(); expect(bridge).to.eql(bridge_expect); 
+  });
+  it('proxy tracker: handler with key FOR complex case', () => {
+    const handler = [{get: [{FOR: 'met_in_FOR', apply: [cbs(bridge, 'apply').cb1,
+                                                       {get: [cbs(bridge, 'get nested').cb1,
+                                                              {FOR: 'met_nested', apply: cbs(bridge, 'apply nested').cb1}
+                                                             ]
+                                                       }]
+                             }, {apply: cbs(bridge, 'apply for each in first get').cb1}]
+                     }, {get: {FOR: ['met_in_FOR', 'prop'], get:  cbs(bridge, 'get in second handler').cb1}}];
+    const proxy_entity = new ProxyTracker(t.entity_obj, ...handler);
+    
+    const bridge_expect = [];
+    proxy_entity.met; expect(bridge).to.eql([]);
+    let value = proxy_entity.met(); bridge_expect.push('apply for each in first get'); expect(bridge).to.eql(bridge_expect);
+    expect(util.types.isProxy(value)).to.be.false;
+    
+    proxy_entity.met_in_FOR; expect(bridge).to.eql(bridge_expect);
+    let val_temp = proxy_entity.prop; expect(bridge).to.eql(bridge_expect);
+    expect(util.types.isProxy(val_temp)).to.be.true;
+    
+    proxy_entity.prop.value; bridge_expect.push('get in second handler'); expect(bridge).to.eql(bridge_expect);
+    
+    value = proxy_entity.met_in_FOR(); bridge_expect.push('apply for each in first get'); bridge_expect.push('apply'); expect(bridge).to.eql(bridge_expect);
+    expect(util.types.isProxy(value)).to.be.true;
+    
+    val_temp = value.prop_nested; bridge_expect.push('get nested'); expect(bridge).to.eql(bridge_expect);
+    expect(util.types.isProxy(val_temp)).to.be.false;
+    
+    val_temp = value.met_nested; bridge_expect.push('get nested'); expect(bridge).to.eql(bridge_expect);
+    expect(util.types.isProxy(val_temp)).to.be.true;
+    
+    val_temp = value.met_nested2(); bridge_expect.push('get nested'); expect(bridge).to.eql(bridge_expect);
+    expect(util.types.isProxy(val_temp)).to.be.false;
+    
+    val_temp = value.met_nested(); bridge_expect.push('get nested'); bridge_expect.push('apply nested'); expect(bridge).to.eql(bridge_expect);
+    expect(util.types.isProxy(val_temp)).to.be.false;
+  });
+  
 });
 describe('internal handler track generator', () => {
   let bridge;
