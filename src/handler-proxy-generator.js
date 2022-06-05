@@ -28,7 +28,7 @@ const default_trapList = function returnEndingTrapFromList(metodo){
 
 function generaHandlerForProxy(handler_of_track_type, {NAME}, entity = undefined, modifiesHandler = undefined, trapList = default_trapList){
   checkHandler({trapList, handler_of_track_type, modifiesHandler, NAME});
-  const handler_generato = creaHandlerRicorsivo(handler_of_track_type, trapListWithCheck(trapList), modifiesHandler);
+  const handler_generato = creaHandlerRicorsivo(handler_of_track_type, {NAME}, trapListWithCheck(trapList), modifiesHandler);
 
   if(modifiesHandler !== undefined) return modifiesHandler(handler_generato, entity);
   else return handler_generato;
@@ -46,18 +46,19 @@ function trapListWithCheck(trap_list){
     return returning_value_by_trap_callback;
   };
 }
-function creaHandlerRicorsivo(handler_of_track_type, trapList, modifiesHandler){
+function creaHandlerRicorsivo(handler_of_track_type, {NAME}, trapList, modifiesHandler){
   const handler = {};
   for(let name in handler_of_track_type){
+    if(handler_of_track_type[name] === undefined) continue;
     const {cbs, hds, ret, FOR} = splitCallbackObject(handler_of_track_type[name]);
     let trappola;
     let returning_value_callback = (ret===undefined?trapList(name):ret);
     const sub_handler = {};
     if(typeof hds === 'object'){
-      sub_handler.hds = creaHandlerRicorsivo(hds, trapList, modifiesHandler);
+      sub_handler.hds = creaHandlerRicorsivo(hds, {NAME}, trapList, modifiesHandler);
     }
     if(Array.isArray(FOR)){
-      sub_handler.FOR = extractReturningTrapsFromFOR(FOR, trapList, modifiesHandler);
+      sub_handler.FOR = extractReturningTrapsFromFOR({NAME}, FOR, trapList, modifiesHandler);
     }
     const sub_handler_all = Object.assign({}, {[EACH]: sub_handler.hds}, sub_handler.FOR);
     
@@ -74,9 +75,12 @@ function splitCallbackObject(list){
           ret: list.ret,
           FOR: list.FOR};
 }
-function extractReturningTrapsFromFOR(FOR, trapList, modifiesHandler){
-  assert(Array.isArray(FOR), 'FOR property must to be an array');
-  
+function extractReturningTrapsFromFOR({NAME}, handlers_FOR_list, trapList, modifiesHandler){
+  assert(Array.isArray(handlers_FOR_list), 'FOR property must to be an array');
+  for(let handler_in_FOR of handlers_FOR_list){
+    let sub_handler_without_NAME = Object.assign({}, handler_in_FOR, {[NAME]: undefined});
+    
+  }
   
 }
 function returnEndingTrap(trap_name, returning_value_callback, handler, modifiesHandler){
@@ -141,5 +145,8 @@ function template_trap(callbacks, returning){
 }
 
 module.exports = generaHandlerForProxy;
-if(ENVIRONMENT === 'dev')
+if(ENVIRONMENT === 'dev'){
   module.exports.CONST = {EACH: EACH};
+  module.exports.extractReturningTrapsFromFOR = extractReturningTrapsFromFOR;
+  module.exports.default_trapList = default_trapList;
+}
