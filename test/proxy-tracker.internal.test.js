@@ -4,53 +4,54 @@ const util = require('util');
 
 const ambiente = process.env.NODE_ENV;
 
-const t = { args_for_testing_traplist: [{}, undefined, undefined],
-            args_for_testing_modifiesHandler: [{}, undefined]};
-Object.freeze(t);
-
-
 if(ambiente === 'dev'){
   const {generaHandlerForProxyTrack ,generaHandlerForProxy} = require(`../proxy-tracker.js`).test;
+  const CONST = generaHandlerForProxyTrack.CONST;
+  
+  const t = { args_for_testing_traplist: [{}, CONST, undefined, undefined],
+            args_for_testing_modifiesHandler: [{}, CONST, undefined]};
+  Object.freeze(t);
+  
   describe('test funzioni interne', () => {
     describe('generaHandler - diverse prove', () => {
       it('handler_track vuoto, {} -> return object {}', () => {
-        expect(generaHandlerForProxy({})).to.be.an('object');
+        expect(generaHandlerForProxy({}, CONST)).to.be.an('object');
       });
       it('handler_track con parametro non incluso nelle trappole di Proxy -> errore', () => {
         const handler = {nonesistenelproxy(arg){}};
-        assert.throws(()=>{generaHandlerForProxy(handler);}, TypeError, 'La trappola non è del tipo previsto da Proxy');
+        assert.throws(()=>{generaHandlerForProxy(handler, CONST);}, TypeError, 'La trappola non è del tipo previsto da Proxy');
       });
       describe('handler_track con solo un parametro ritorna un oggetto con una sola funzione', () => {
         it('che ha solo una callback in get', () => {
           const callback_da_applicare = function(...arg){};
           const handler = {get: [callback_da_applicare]};
-          expect(generaHandlerForProxy(handler)).to.be.an('object').that.have.all.keys('get').and.that.have.property('get').that.to.be.a('function');
+          expect(generaHandlerForProxy(handler, CONST)).to.be.an('object').that.have.all.keys('get').and.that.have.property('get').that.to.be.a('function');
         });
         it('che ha solo una callback', () => {
           const callback_da_applicare = function(...arg){};
           const handler = {apply: [callback_da_applicare]};
-          expect(generaHandlerForProxy(handler)).to.be.an('object').that.have.all.keys('apply').and.that.have.property('apply').that.to.be.a('function');
+          expect(generaHandlerForProxy(handler, CONST)).to.be.an('object').that.have.all.keys('apply').and.that.have.property('apply').that.to.be.a('function');
         });
         it('che ha due callback', () => {
           const callback_da_applicare = function(...arg){};
           const handler = {apply: [callback_da_applicare, callback_da_applicare]};
-          expect(generaHandlerForProxy(handler)).to.be.an('object').that.have.all.keys('apply').and.that.have.property('apply').that.to.be.a('function');
+          expect(generaHandlerForProxy(handler, CONST)).to.be.an('object').that.have.all.keys('apply').and.that.have.property('apply').that.to.be.a('function');
         });
         it('che ha una callback e un oggetto tipo handler_track', () => {
           const callback_da_applicare = function(...arg){};
           const handler_track_innestato = {apply: [callback_da_applicare]};
           const handler = {apply: [callback_da_applicare, callback_da_applicare, handler_track_innestato]};
-          expect(generaHandlerForProxy(handler)).to.be.an('object').that.have.all.keys('apply').and.that.have.property('apply').that.to.be.a('function');
+          expect(generaHandlerForProxy(handler, CONST)).to.be.an('object').that.have.all.keys('apply').and.that.have.property('apply').that.to.be.a('function');
         });
         it('senza callback con solo oggetotipo handler_track', () => {
           const callback_da_applicare = function(...arg){};
           const handler_track_innestato = {apply: [callback_da_applicare]};
           const handler = {apply: [handler_track_innestato]};
-          expect(generaHandlerForProxy(handler)).to.be.an('object').that.have.all.keys('apply').and.that.have.property('apply').that.to.be.a('function');
+          expect(generaHandlerForProxy(handler, CONST)).to.be.an('object').that.have.all.keys('apply').and.that.have.property('apply').that.to.be.a('function');
         });
         it('handler_track con trappola senza callback e senza handler', () => {
           const handler = {apply: []};
-          expect(generaHandlerForProxy(handler)).to.be.an('object').that.have.all.keys('apply').and.that.have.property('apply').that.to.be.a('function');
+          expect(generaHandlerForProxy(handler, CONST)).to.be.an('object').that.have.all.keys('apply').and.that.have.property('apply').that.to.be.a('function');
         });
       });
       describe('handler_track con più parametri -> ritorna oggetto con più funzioni', () => {
@@ -59,7 +60,7 @@ if(ambiente === 'dev'){
           const handler_track_innestato = {get: [callback_da_applicare]};
           const handler_track = {construct: [callback_da_applicare, callback_da_applicare, handler_track_innestato, callback_da_applicare],
                                  apply: [handler_track_innestato, callback_da_applicare]};
-          expect(generaHandlerForProxy(handler_track)).to.be.an('object').that.have.all.keys('apply', 'construct')
+          expect(generaHandlerForProxy(handler_track, CONST)).to.be.an('object').that.have.all.keys('apply', 'construct')
                   .and.that.have.property('construct').that.to.be.a('function');    
         });
         it('profondità handler innestati maggiore di 2', () => {
@@ -68,7 +69,7 @@ if(ambiente === 'dev'){
           const handler_track_innestato2 = {apply: [callback_da_applicare]};
           const handler_track = {construct: [callback_da_applicare, callback_da_applicare, {get: [handler_track_innestato2]}, callback_da_applicare],
                                  apply: [handler_track_innestato, callback_da_applicare]};
-          const handler_generato = generaHandlerForProxy(handler_track);
+          const handler_generato = generaHandlerForProxy(handler_track, CONST);
           expect(handler_generato).to.be.an('object').that.have.all.keys('apply', 'construct');
           expect(handler_generato).have.property('construct').that.to.be.a('function');
           expect(handler_generato).have.property('apply').that.to.be.a('function');
@@ -77,13 +78,13 @@ if(ambiente === 'dev'){
       describe('function modifies handler', () => {
         for(let wrong of [0, -5, +8, false, true, [], {}, 'string'])
           it('modifiesHandler != function or undefined throws error', () => {
-            expect(()=>{generaHandlerForProxy(...t.args_for_testing_modifiesHandler, wrong)}).to.throw('callback for changing handler must to be a function');
+            expect(()=>{generaHandlerForProxy(...t.args_for_testing_modifiesHandler, wrong);}).to.throw('callback for changing handler must to be a function');
           });
       });
       describe('different trap list', () => {
         for(let wrong of [0, -5, +8, false, true, [], {}, 'string'])
           it('traplist != function or undefined throws error', () => {
-            expect(()=>{generaHandlerForProxy(...t.args_for_testing_traplist, wrong)}).to.throw('traplist must to be a function');
+            expect(()=>{generaHandlerForProxy(...t.args_for_testing_traplist, wrong);}).to.throw('traplist must to be a function');
           });
       });
     });

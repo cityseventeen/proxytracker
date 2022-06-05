@@ -24,17 +24,18 @@ const default_trapList = function returnEndingTrapFromList(metodo){
   return ending_trap;
 };
 
-function generaHandlerForProxy(handler_of_track_type, entity = undefined, modifiesHandler = undefined, trapList = default_trapList){
-  checkHandler({trapList, handler_of_track_type, modifiesHandler});
+function generaHandlerForProxy(handler_of_track_type, {NAME}, entity = undefined, modifiesHandler = undefined, trapList = default_trapList){
+  checkHandler({trapList, handler_of_track_type, modifiesHandler, NAME});
   const handler_generato = creaHandlerRicorsivo(handler_of_track_type, trapListWithCheck(trapList), modifiesHandler);
 
   if(modifiesHandler !== undefined) return modifiesHandler(handler_generato, entity);
   else return handler_generato;
 }
-function checkHandler({handler_of_track_type, trapList, modifiesHandler}){
+function checkHandler({handler_of_track_type, trapList, modifiesHandler, NAME}){
   assert(typeof trapList === 'function', 'traplist must to be a function');
   assert(typeof handler_of_track_type === 'object', 'handler non è stato inserito');
   assert(modifiesHandler === undefined || typeof modifiesHandler === 'function', 'callback for changing handler must to be a function');
+  assert(typeof NAME === 'symbol', 'CONST.NAME must to be a Symbol');
 }
 function trapListWithCheck(trap_list){
   return function(trap_name){
@@ -70,6 +71,10 @@ function splitCallbackObject(list){
           hds: list.hds,
           ret: list.ret,
           FOR: list.FOR};
+}
+function extractReturningTrapsFromFOR(FOR, trapList, modifiesHandler){
+  
+  
 }
 function returnEndingTrap(trap_name, returning_value_callback, handler, modifiesHandler){
   return (...args)=>{ const handler_choosed = chooseHandler(trap_name, args, handler);
