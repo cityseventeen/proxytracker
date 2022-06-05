@@ -92,5 +92,4 @@ function returnRifNAMEInArrayEntered(array, target){
 
 
 module.exports = generaHandlerForProxyTrack;
-if(ENVIRONMENT === 'dev')
-  module.exports.CONST = {NAME};
+module.exports.CONST = {NAME};

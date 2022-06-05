@@ -159,8 +159,7 @@ function template_trap(callbacks, returning){
 }
 
 module.exports = generaHandlerForProxy;
-if(ENVIRONMENT === 'dev'){
-  module.exports.CONST = {EACH: EACH};
-  module.exports.extractReturningTrapsFromFOR = extractReturningTrapsFromFOR;
-  module.exports.default_trapList = default_trapList;
-}
+module.exports.CONST = {EACH: EACH};
+module.exports.extractReturningTrapsFromFOR = extractReturningTrapsFromFOR;
+module.exports.default_trapList = default_trapList;
+

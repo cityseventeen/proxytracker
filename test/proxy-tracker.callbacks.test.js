@@ -37,8 +37,6 @@ describe('inserimento delle callback', () => {
     });
     it('handler = {construct: {get: {apply}}} inserisce la callback in apply e non in construct o get', () => {
       const handler = {construct: {get: {apply: cb1}}};
-
-      const {generaHandlerForProxyTrack} = require(`../proxy-tracker.js`).test;
       let track = new ProxyTracker(classe, handler);
 
       let istanza = new track(5);
