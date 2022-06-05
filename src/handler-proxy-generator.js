@@ -2,6 +2,8 @@
 
 const assert = require('assert').strict;
 
+const EACH = Symbol('EACH');
+
 const default_trapList = function returnEndingTrapFromList(metodo){
   const ending_of_trap_list = {
      apply(target, thisArg, args){return Reflect.apply(...arguments);},
@@ -45,20 +47,21 @@ function creaHandlerRicorsivo(handler_of_track_type, trapList, modifiesHandler){
   const handler = {};
   for(let name in handler_of_track_type){
     const {cbs, hds, ret, FOR} = splitCallbackObject(handler_of_track_type[name]);
-    let trappola_by_hds;
-    let trappola_by_FOR = {};
+    let trappola;
     let returning_value_callback = (ret===undefined?trapList(name):ret);
-    let sub_handler;
+    const sub_handler = {};
     if(typeof hds === 'object'){
-      sub_handler = creaHandlerRicorsivo(hds, trapList, modifiesHandler);
+      sub_handler.hds = creaHandlerRicorsivo(hds, trapList, modifiesHandler);
     }
     if(Array.isArray(FOR)){
-      extractReturningTrapsFromFOR(FOR, trapList, modifiesHandler);
+      sub_handler.FOR = extractReturningTrapsFromFOR(FOR, trapList, modifiesHandler);
     }
-    let returning = returnEndingTrap(returning_value_callback, sub_handler, modifiesHandler);
-    trappola_by_hds = template_trap(cbs, returning);
+    const sub_handler_all = Object.assign({}, {[EACH]: sub_handler.hds}, sub_handler.FOR);
+    
+    let returning = returnEndingTrap(name, returning_value_callback, sub_handler_all, modifiesHandler);
+    trappola = template_trap(cbs, returning);
 
-    handler[name] = trappola_by_hds;
+    handler[name] = trappola;
   }
   return handler;
 }
@@ -68,16 +71,41 @@ function splitCallbackObject(list){
           ret: list.ret,
           FOR: list.FOR};
 }
-function returnEndingTrap(returning_value_callback, handler, modifiesHandler){
-  return (...args)=>{ let value_returned_by_trap = returning_value_callback(...args);
+function returnEndingTrap(trap_name, returning_value_callback, handler, modifiesHandler){
+  return (...args)=>{ const handler_choosed = chooseHandler(trap_name, args, handler);
+                      let value_returned_by_trap = returning_value_callback(...args);
                       let handler_modified = undefined;
-                      if(typeof handler === 'object'){
+                      if(typeof handler_choosed === 'object'){
                         if(typeof modifiesHandler === 'function')
-                          handler_modified = modifiesHandler(handler, value_returned_by_trap);
+                          handler_modified = modifiesHandler(handler_choosed, value_returned_by_trap);
                         else
-                          handler_modified = handler;
+                          handler_modified = handler_choosed;
                       }
                       return returnProxyOrValue(value_returned_by_trap, handler_modified);};
+}
+function chooseHandler(trap_name, args, handler){
+  let name_prop = extractPropertyNameFromArgsTrap(trap_name, args);
+  if(name_prop === undefined) return handler[EACH];
+
+  if(name_prop in handler)
+    return handler[name_prop];
+  else
+    return handler[EACH];
+}
+function extractPropertyNameFromArgsTrap(trap_name, args){
+  let prop_name;
+  switch(trap_name){
+    case 'apply': [prop_name] = args; prop_name = prop_name.name; break;
+    case 'get': [,prop_name] = args; break;
+    case 'defineProperty': [,prop_name] = args; break;
+    case 'deleteProperty': [,prop_name] = args; break;
+    case 'getOwnPropertyDescriptor': [,prop_name] = args; break;
+    case 'has': [,prop_name] = args; break;
+    case 'set': [,prop_name] = args; break;
+    default: prop_name = undefined;
+  }
+  
+  return prop_name;
 }
 
 function returnProxyOrValue(value, handler){
@@ -105,3 +133,4 @@ function template_trap(callbacks, returning){
 }
 
 module.exports = generaHandlerForProxy;
+module.exports.CONST = {EACH: EACH};
