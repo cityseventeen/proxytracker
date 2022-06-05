@@ -1,3 +1,6 @@
+
+const ENVIRONMENT = process.env.NODE_ENV;
+
 const assert = require('assert').strict;
 
 const {check, errors} = require('./errors.js');
@@ -89,4 +92,5 @@ function returnRifNAMEInArrayEntered(array, target){
 
 
 module.exports = generaHandlerForProxyTrack;
-module.exports.CONST = {NAME};
+if(ENVIRONMENT === 'dev')
+  module.exports.CONST = {NAME};

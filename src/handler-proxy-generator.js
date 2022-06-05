@@ -1,4 +1,6 @@
-/* global Reflect, Function */
+/* global Reflect, Function, process */
+
+const ENVIRONMENT = process.env.NODE_ENV;
 
 const assert = require('assert').strict;
 
@@ -73,6 +75,7 @@ function splitCallbackObject(list){
           FOR: list.FOR};
 }
 function extractReturningTrapsFromFOR(FOR, trapList, modifiesHandler){
+  assert(Array.isArray(FOR), 'FOR property must to be an array');
   
   
 }
@@ -138,4 +141,5 @@ function template_trap(callbacks, returning){
 }
 
 module.exports = generaHandlerForProxy;
-module.exports.CONST = {EACH: EACH};
+if(ENVIRONMENT === 'dev')
+  module.exports.CONST = {EACH: EACH};
