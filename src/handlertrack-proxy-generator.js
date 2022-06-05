@@ -31,8 +31,10 @@ function unisciHandlersRicorsivo(handler_track, ...elements){
       else{
         let traps_list = Object.keys(element);
         if(element.FOR !== undefined){
+          //if(typeof element.FOR === 'function') throw new Error('ToDevelop');
           let name_FOR_list = Array.isArray(element.FOR)?element.FOR:[element.FOR];
           for(let name_FOR of name_FOR_list){
+            //if(typeof name_FOR !== 'string') throw new Error('ToDevelop');
             let rif_handler = insertFORinHandler(handler_track, name_FOR);
             traps_list = traps_list.filter(el => el !== 'FOR');
             for(let name of traps_list){
