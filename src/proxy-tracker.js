@@ -11,7 +11,7 @@ const {trapRemover, removerProxyForExtends} = require('./proxy-remover.js');
 function ProxyTracker(target, ...callbacks_for_tracker){
   checkProxyTracker(target, callbacks_for_tracker);
   const handler_tipo_tracker = generaHandlerForProxyTrack(...callbacks_for_tracker);
-  const handler = generaHandlerForProxy(handler_tipo_tracker, target, modifiesHandler);
+  const handler = generaHandlerForProxy(handler_tipo_tracker, generaHandlerForProxyTrack.CONST, target, modifiesHandler);
   return new Proxy(target, handler);
 }
 function checkProxyTracker(target, callbacks_for_tracker){

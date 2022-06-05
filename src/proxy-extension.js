@@ -11,7 +11,7 @@ function ProxyExtension(target, ...handlers){
   
   const handle_with_ret_property = copyHandler(handler_tipo_tracker);
   handlerWithLastCallbackSeparedInNewParameter(handle_with_ret_property);
-  const handler = generaHandlerForProxy(handle_with_ret_property, target, modifiesHandler);
+  const handler = generaHandlerForProxy(handle_with_ret_property, generaHandlerForProxyTrack.CONST, target, modifiesHandler);
   return new Proxy(target, handler);
 }
 
