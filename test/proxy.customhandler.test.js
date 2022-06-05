@@ -8,8 +8,8 @@ const ENVIRONMENT = process.env.NODE_ENV;
 const {ProxyTracker, ProxyExtension} = require(`../proxy-tracker.js`);
 const errors = require('../src/errors.js').errors.message;
 
-const t = {entity_obj: {prop: 5, met: function(){return {prop_nested: 'value', met_nested: function(){return {prop_nested2: 'value'};}};},
-                                 met_in_FOR: function(){return {prop_nested: 'value', met_nested: function(){return {prop_nested2: 'value'};}};}}};
+const t = {entity_obj: {prop: {value: 5}, met: function(){return {prop_nested: {value: 'value'}, met_nested: function(){return {prop_nested2: 'value'};}, met_nested2(){return 8;}};},
+                                 met_in_FOR: function(){return {prop_nested: {value: 'value'}, met_nested: function(){return {prop_nested2: 'value'};}, met_nested2(){return 8;}};}}};
 Object.freeze(t);
 
 function cbs(bridge, trap){
@@ -61,8 +61,6 @@ describe('disabling proxy feature for trap', () => {
     value_nested = value.met_nested; expect(bridge).to.eql(['apply callback called', 'get callback called']);
     expect(util.types.isProxy(value_nested)).to.be.false;
   });
-  
-  
 });
 describe('internal handler track generator', () => {
   let bridge;
