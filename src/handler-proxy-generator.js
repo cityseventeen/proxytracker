@@ -77,11 +77,14 @@ function splitCallbackObject(list){
 }
 function extractReturningTrapsFromFOR({NAME}, handlers_FOR_list, trapList, modifiesHandler){
   assert(Array.isArray(handlers_FOR_list), 'FOR property must to be an array');
-  for(let handler_in_FOR of handlers_FOR_list){
-    let sub_handler_without_NAME = Object.assign({}, handler_in_FOR, {[NAME]: undefined});
-    
-  }
+  const sub_handlers = {};
   
+  for(let handler_in_FOR of handlers_FOR_list){
+    let name_prop_that_must_to_have_subhandler = handler_in_FOR[NAME];
+    let sub_handler_without_NAME = Object.assign({}, handler_in_FOR, {[NAME]: undefined});
+    sub_handlers[name_prop_that_must_to_have_subhandler] = creaHandlerRicorsivo(sub_handler_without_NAME, {NAME}, trapList, modifiesHandler);
+  }
+  return sub_handlers;
 }
 function returnEndingTrap(trap_name, returning_value_callback, handler, modifiesHandler){
   return (...args)=>{ const handler_choosed = chooseHandler(trap_name, args, handler);

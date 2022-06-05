@@ -1,4 +1,4 @@
-/* global Promise, describe, it, __dirname, process, Reflect*/
+/* global Promise, describe, it, __dirname, process, Reflect, Function*/
 const {expect, assert} = require('chai');
 const util = require('util');
 const ChangeEnv = require('change-env')(require);
@@ -128,5 +128,23 @@ describe('internal handler track generator', () => {
       }
     });
     
+  }, `../proxy-tracker.js`);
+});
+
+describe('internal handler generator: extractReturningTrapsFromFOR', () => {
+  ChangeEnv('dev', ()=>{
+    const {generaHandlerForProxy} = require(`../proxy-tracker.js`).test;
+    const extractReturningTrapsFromFOR = generaHandlerForProxy.extractReturningTrapsFromFOR;
+    const trapList = generaHandlerForProxy.default_trapList;
+    const NAME = Symbol('NAME');
+    it('return expected', () => {
+      const handler_track = {get: {cbs: [], hds: undefined, FOR: [{[NAME]: 'prop1', get: {cbs: [], hds: undefined}}, {[NAME]: 'prop2', apply: {cbs: [], hds: undefined}}]}};
+      const handlersListByFOR = extractReturningTrapsFromFOR({NAME}, handler_track.get.FOR, trapList);
+      const expected = {prop1: {get: Function}, prop2: {apply: Function}};
+      for(let prop in expected){
+        expect(handlersListByFOR).to.have.property(prop).that.is.an('object');
+        expect(handlersListByFOR[prop]).to.have.all.keys(expected[prop]);
+      }
+    });
   }, `../proxy-tracker.js`);
 });
