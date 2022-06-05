@@ -2,6 +2,8 @@ const assert = require('assert').strict;
 
 const {check, errors} = require('./errors.js');
 
+const NAME = Symbol('NAME');
+
 function generaHandlerForProxyTrack(...callbacks_for_tracker){
   const handler_track = creaSubHandlerTrack();
   checkArgsForGeneraHandlersTrack(...callbacks_for_tracker);
@@ -76,12 +78,13 @@ function insertFORtarget(riferimento, target){
 }
 function returnRifNAMEInArrayEntered(array, target){
   for(let el of array){
-    if(el.NAME === target) return el;
+    if(el[NAME] === target) return el;
   }
-  let length = array.push({NAME: target});
+  let length = array.push({[NAME]: target});
   return array[length-1];
 }
 
 
 
 module.exports = generaHandlerForProxyTrack;
+module.exports.CONST = {NAME: NAME};

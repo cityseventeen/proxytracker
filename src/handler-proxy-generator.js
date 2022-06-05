@@ -45,16 +45,20 @@ function creaHandlerRicorsivo(handler_of_track_type, trapList, modifiesHandler){
   const handler = {};
   for(let name in handler_of_track_type){
     const {cbs, hds, ret, FOR} = splitCallbackObject(handler_of_track_type[name]);
-    let trappola;
+    let trappola_by_hds;
+    let trappola_by_FOR = {};
     let returning_value_callback = (ret===undefined?trapList(name):ret);
     let sub_handler;
     if(typeof hds === 'object'){
       sub_handler = creaHandlerRicorsivo(hds, trapList, modifiesHandler);
     }
+    if(Array.isArray(FOR)){
+      extractReturningTrapsFromFOR(FOR, trapList, modifiesHandler);
+    }
     let returning = returnEndingTrap(returning_value_callback, sub_handler, modifiesHandler);
-    trappola = template_trap(cbs, returning);
+    trappola_by_hds = template_trap(cbs, returning);
 
-    handler[name] = trappola;
+    handler[name] = trappola_by_hds;
   }
   return handler;
 }
